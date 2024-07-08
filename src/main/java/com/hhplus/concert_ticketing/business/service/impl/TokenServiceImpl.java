@@ -1,31 +1,33 @@
 package com.hhplus.concert_ticketing.business.service.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.repository.TokenRepository;
 import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class TokenServiceImpl implements TokenService {
 
-    private final TokenRepository tokenRepository;
 
-    public TokenServiceImpl(TokenRepository tokenRepository) {
-        this.tokenRepository = tokenRepository;
+    @Override
+    public Token generateToken(Long userId) {
+        String token = UUID.randomUUID().toString();
+        String status = TokenStatus.WAITING.toString();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdAt = now;
+        LocalDateTime expiresAt = now.plusMinutes(10);
+        return new Token(userId, token, status, createdAt, expiresAt);
     }
 
     @Override
-    public Token saveToken(Token token) {
-        return tokenRepository.saveToken(token);
-    }
-
-    @Override
-    public Token validateToken(Long userId) {
-        return tokenRepository.getToken(userId);
-    }
-
-    @Override
-    public Token updateToken(Token token) {
-        return tokenRepository.updateToken(token);
+    public Token generateToken(Long userId, String token) {
+        String status = TokenStatus.WAITING.toString();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdAt = now;
+        LocalDateTime expiresAt = now.plusMinutes(10);
+        return new Token(userId, token, status, createdAt, expiresAt);
     }
 }

@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.presentation.dto.response;
 
-import com.hhplus.concert_ticketing.presentation.status.SeatStatus;
+import com.hhplus.concert_ticketing.status.SeatStatus;
 import lombok.Getter;
 
 @Getter
