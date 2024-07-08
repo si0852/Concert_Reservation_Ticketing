@@ -3,9 +3,14 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.ConcertOption;
 import com.hhplus.concert_ticketing.business.entity.Seat;
+import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.business.service.ConcertOptionService;
+import com.hhplus.concert_ticketing.business.service.TokenQueueService;
+import com.hhplus.concert_ticketing.business.service.impl.ConcertOptionServiceImpl;
 import com.hhplus.concert_ticketing.business.service.impl.SeatServiceImpl;
+import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
 import com.hhplus.concert_ticketing.status.SeatStatus;
+import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +38,27 @@ class SeatManagementFacadeImlTest {
     SeatServiceImpl seatService;
 
     @Mock
-    ConcertOptionService concertOptionService;
+    ConcertOptionServiceImpl concertOptionService;
+
+    @Mock
+    TokenQueueServiceImpl tokenQueueService;
+
+
+    @DisplayName("토큰 유효성 체크, 토큰 상태가 ACTIVE일 경우")
+    @Test
+    void checking_token_and_stats_is_Active() {
+        //given
+        Long userId = 1L;
+        Long tokenId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
+        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+
+        // when && then
+        assertThrows(RuntimeException.class, () -> {
+            seatManagementFacadeIml.getSeatData(userId, tokenId);
+        });
+    }
 
     @DisplayName("유효성 체크 ConcertOption이 Null일 경우")
     @Test
@@ -41,7 +66,11 @@ class SeatManagementFacadeImlTest {
         //given
         Long concertOptionId = 1L;
         Long tokenId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
+        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
         when(concertOptionService.getConcertOptionDataByLocalDate(concertOptionId)).thenReturn(null);
+
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -57,6 +86,9 @@ class SeatManagementFacadeImlTest {
         Long tokenId = 1L;
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
+        Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
+
+        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
         when(concertOptionService.getConcertOptionDataByLocalDate(concertOptionId))
                 .thenReturn(new ConcertOption(1L, now, 10000.0));
         List<Seat> list = new ArrayList<>();
@@ -79,7 +111,9 @@ class SeatManagementFacadeImlTest {
         Long tokenId = 1L;
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
+        Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
 
+        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
         ConcertOption concertOption = new ConcertOption(concertId, now.plusHours(1), 10000.0);
         when(concertOptionService.getConcertOptionDataByLocalDate(concertOptionId))
                 .thenReturn(concertOption);
