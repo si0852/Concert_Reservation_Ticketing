@@ -25,6 +25,11 @@ public class TokenRepositoryImpl implements TokenRepository {
     }
 
     @Override
+    public Token getTokenByTokenId(Long tokenId) {
+        return jpaTokenRepository.findByTokenId(tokenId).orElse(null);
+    }
+
+    @Override
     public Token updateToken(Token token) {
         return jpaTokenRepository.save(token);
     }

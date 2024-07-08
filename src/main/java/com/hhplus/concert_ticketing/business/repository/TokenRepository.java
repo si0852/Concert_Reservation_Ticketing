@@ -8,5 +8,7 @@ public interface TokenRepository {
 
     Token getToken(Long userId);
 
+    Token getTokenByTokenId(Long tokenId);
+
     Token updateToken(Token Token);
 }

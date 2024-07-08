@@ -40,13 +40,13 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concert_is_null() {
         //given
-        Long userId = 1L;
+        Long tokenId = 1L;
         Long concertId = 1L;
         when(concertService.getConcertData(concertId)).thenReturn(null);
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(userId, concertId);
+            concertInfoManagementFacade.getConcertOption(tokenId, concertId);
         });
     }
 
@@ -54,13 +54,13 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concert_is_null2() {
         //given
-        Long userId = 1L;
+        Long tokenId = 1L;
         Long concertId = 1L;
         when(concertService.getConcertData(concertId)).thenReturn(null);
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(userId, concertId);
+            concertInfoManagementFacade.getConcertOption(tokenId, concertId);
         });
     }
 
@@ -68,7 +68,7 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concertOption_list_size_0() {
         //given
-        Long userId = 1L;
+        Long tokenId = 1L;
         Long concertId = 1L;
         Concert concert = new Concert("콘서트");
         when(concertService.getConcertData(concertId)).thenReturn(concert);
@@ -79,7 +79,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         //then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(userId, concertId);
+            concertInfoManagementFacade.getConcertOption(tokenId, concertId);
         });
     }
 
@@ -87,7 +87,7 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concertOption_list_size_1() {
         //given
-        Long userId = 1L;
+        Long tokenId = 1L;
         Long concertId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Concert concert = new Concert("콘서트");
@@ -101,7 +101,7 @@ class ConcertInfoManagementFacadeImplTest {
         );
 
         when(concertOptionService.getConcertOptionData(concertId)).thenReturn(concertOptionList);
-        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(userId, concertId);
+        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(tokenId, concertId);
         //then
         assertThat(concertOption).isEqualTo(concertOptionList);
     }

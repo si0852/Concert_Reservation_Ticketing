@@ -25,6 +25,11 @@ public class TokenQueueServiceImpl implements TokenQueueService {
     }
 
     @Override
+    public Token validateTokenByTokenId(Long tokenId) {
+        return tokenRepository.getTokenByTokenId(tokenId);
+    }
+
+    @Override
     public Token updateToken(Token token) {
         return tokenRepository.updateToken(token);
     }

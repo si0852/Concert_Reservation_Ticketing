@@ -8,5 +8,7 @@ public interface TokenQueueService {
 
     Token validateToken(Long userId);
 
+    Token validateTokenByTokenId(Long tokenId);
+
     Token updateToken(Token token);
 }

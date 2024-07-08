@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ConcertInfoManagementFacade {
 
-    List<ConcertOption> getConcertOption(Long userId, Long concertId);
+    List<ConcertOption> getConcertOption(Long tokenId, Long concertId);
 }
