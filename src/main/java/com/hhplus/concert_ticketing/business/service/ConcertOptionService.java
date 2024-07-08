@@ -13,5 +13,7 @@ public interface ConcertOptionService {
 
     List<ConcertOption> getConcertOptionData(Long concertId);
 
+    ConcertOption getConcertOptionDataByLocalDate(Long concertOptionId);
+
     List<LocalDateTime> getConcertDate(Long concertOptionId);
 }

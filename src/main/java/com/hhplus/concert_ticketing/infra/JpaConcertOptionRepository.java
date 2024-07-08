@@ -6,10 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface JpaConcertOptionRepository extends JpaRepository<ConcertOption, Long> {
     List<ConcertOption> findAllByConcertId(Long concertId);
+
+    Optional<ConcertOption> findByConcertOptionIdAndConcertDateGreaterThanEqual(Long concertOptionId, LocalDateTime now);
 
     List<LocalDateTime> findConcertDateByConcertId(Long concertId);
 }

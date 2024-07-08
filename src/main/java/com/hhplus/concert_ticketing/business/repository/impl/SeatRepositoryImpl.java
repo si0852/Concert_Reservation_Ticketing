@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.SeatRepository;
 import com.hhplus.concert_ticketing.infra.JpaSeatRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class SeatRepositoryImpl implements SeatRepository {
 
@@ -20,8 +22,8 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
-    public Seat getSeatData(Long concertOptionId) {
-        return jpaSeatRepository.findByConcertOptionId(concertOptionId).orElse(null);
+    public List<Seat> getSeatData(Long concertOptionId, String status) {
+        return jpaSeatRepository.findByConcertOptionIdAndSeatStatus(concertOptionId, status);
     }
 
     @Override
