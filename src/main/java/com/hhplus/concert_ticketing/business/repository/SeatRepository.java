@@ -10,7 +10,7 @@ public interface SeatRepository {
 
     List<Seat> getSeatData(Long concertOptionId, String status);
 
-
+    Seat getSeatData(Long seatId);
 
     Seat update(Seat seat);
 }

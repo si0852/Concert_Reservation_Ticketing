@@ -27,6 +27,11 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
+    public Seat getSeatData(Long seatId) {
+        return jpaSeatRepository.findById(seatId).orElse(null);
+    }
+
+    @Override
     public Seat update(Seat seat) {
         return jpaSeatRepository.save(seat);
     }

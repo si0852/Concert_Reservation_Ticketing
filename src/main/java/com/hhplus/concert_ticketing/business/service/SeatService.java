@@ -10,5 +10,7 @@ public interface SeatService {
 
     List<Seat> getSeatData(Long concertOptionId, String status);
 
+    Seat getSeatOnlyData(Long seatId);
+
     Seat updateSeatData(Seat seat);
 }

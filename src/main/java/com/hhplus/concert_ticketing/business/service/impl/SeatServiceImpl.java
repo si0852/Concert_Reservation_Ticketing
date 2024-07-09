@@ -27,6 +27,11 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public Seat getSeatOnlyData(Long seatId) {
+        return seatRepository.getSeatData(seatId);
+    }
+
+    @Override
     public Seat updateSeatData(Seat seat) {
         return seatRepository.update(seat);
     }

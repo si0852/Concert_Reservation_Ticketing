@@ -31,6 +31,10 @@ public class Seat {
         this.seatStatus = status;
     }
 
+    public void setSeatStatus(String seatStatus) {
+        this.seatStatus = seatStatus;
+    }
+
     public boolean isAvailableSeat() {
         if(this.seatStatus.equals("Lock")) return false;
         return true;

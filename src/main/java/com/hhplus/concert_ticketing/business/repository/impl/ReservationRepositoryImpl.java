@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.ReservationRepository;
 import com.hhplus.concert_ticketing.infra.JpaReservationRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class ReservationRepositoryImpl implements ReservationRepository {
 
@@ -27,5 +29,10 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public Reservation update(Reservation reservation) {
         return jpaReservationRepository.save(reservation);
+    }
+
+    @Override
+    public List<Reservation> getReservationData(Long userId) {
+        return jpaReservationRepository.findAllByUserId(userId);
     }
 }
