@@ -23,4 +23,8 @@ public class Customer {
         this.userName = userName;
         this.balance = balance;
     }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
 }
