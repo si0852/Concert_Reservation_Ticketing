@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.TokenRepository;
 import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TokenQueueServiceImpl implements TokenQueueService {
 
@@ -37,5 +39,10 @@ public class TokenQueueServiceImpl implements TokenQueueService {
     @Override
     public Token updateToken(Token token) {
         return tokenRepository.updateToken(token);
+    }
+
+    @Override
+    public List<Token> getTokenListByStatus(String status) {
+        return tokenRepository.getTokenListByStatus(status);
     }
 }

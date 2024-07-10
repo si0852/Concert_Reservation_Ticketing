@@ -8,11 +8,14 @@ import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Component
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
     private final TokenQueueService tokenQueueService;
+    private final Integer maxActiveTokens = 30;
 
     public TokenManagementFacadeImpl(TokenService tokenService, TokenQueueService tokenQueueService) {
         this.tokenService = tokenService;
@@ -24,17 +27,37 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
     @Override
     public Token insertToken(Long userId) {
         // 토큰 존재여부 확인
+        // -> userId 조건으로 토큰 존재여부 확인
         Token token = tokenQueueService.validateToken(userId);
-        Token generatedToken = null;
-        // 토큰 발급
-        if(token == null) generatedToken = tokenService.generateToken(userId);
-        // 토큰이 이미 존재 && 활성화 상태이면 예약중이므로 익셉션 발생
-        if(token != null && (token.getStatus().equals(TokenStatus.ACTIVE.toString()))) throw new RuntimeException("이미 예약중인 데이터가 존재합니다.");
+        // -> status: ACTIVE 조건으로 토큰 존재여부 확인
+        List<Token> activeToken = tokenQueueService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
+        // -> status: WAITING 조건으로 토큰 존재여부 확인
+        List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
-        // 토큰이 이미 존재 && 만료 상태이면 발급날짜만 발급
+        Token generatedToken = null;
+
+        // 토큰 발급
+        // -> userId로 조회된 토큰이 없을 경우
+        if(token == null) generatedToken = tokenService.generateToken(userId);
+        // -> userId로 조회된 토큰이 이미 존재 && ACTIVE 상태이면 예약중이므로 익셉션 발생
+        if(token != null && (token.getStatus().equals(TokenStatus.ACTIVE.toString()))) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
+
+        // -> userId로 조회된 토큰이 이미 존재 && EXPIRED 상태이면 발급날짜만 발급
         else if (token != null && token.getStatus().equals(TokenStatus.EXPIRED.toString())) generatedToken = tokenService.generateToken(userId, token.getToken());
 
+        // -> userId로 조회된 토큰이 존재하고 Waiting 상태이면 generateToken은 null 값이다.
 
-        return generatedToken == null ? token : tokenQueueService.saveToken(generatedToken);
+        // 대기열에는 40개의 토큰만 들어올 수 있다. activeSpace는 대기열의 남은 자리를 의미한다.
+        int activeSpace = maxActiveTokens - activeToken.size();
+        // 대기열 남은 자리 - Waiting 상태인 토큰 수
+        int spaceQueue = activeSpace - waitingToken.size();
+
+        // 대기열에 자리가 남아있다면
+        if (activeSpace>0 && spaceQueue>0) {
+            generatedToken.setStatus(TokenStatus.ACTIVE.toString());
+        }
+
+
+        return tokenQueueService.saveToken(generatedToken);
     }
 }

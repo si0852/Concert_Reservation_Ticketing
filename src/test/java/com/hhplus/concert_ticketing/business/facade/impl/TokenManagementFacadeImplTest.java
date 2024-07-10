@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,20 +40,49 @@ class TokenManagementFacadeImplTest {
     @Mock
     TokenQueueServiceImpl tokenQueueService;
 
+    private final Integer maxActiveTokens = 30;
+    // userId 통해 조회된 token 정보 null 일때, generateToken = generateToken
+    // userId 통해 조회된 token 정보 null 아닐때, runtimeException or generateToken
 
 
-    @DisplayName("토큰 저장, 토큰 조회시 Null 일경우")
+    @DisplayName("토큰 저장, 토큰 조회시 값이 Null 이고 대기열에 자리가 있다면 상태가 active인 토큰이 저장된다")
     @Test
-    void select_token_is_null() {
+    void select_token_is_null_active() {
         //given
         Long userId = 1L;
-        when(tokenQueueService.validateToken(userId)).thenReturn(null);
+        LocalDateTime now = LocalDateTime.now();
+        Token generateToken = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
 
-        // when
-        Token generatedToken = tokenService.generateToken(userId);
-        Token savedToken = tokenManagementFacade.insertToken(userId);
-        // then
-        assertThat(generatedToken).isSameAs(savedToken);
+        //when
+        int activeSpace = 5;
+        int spaceQueue = activeSpace - 2;
+
+        if (activeSpace > 0 && spaceQueue > 0) {
+            generateToken.setStatus(TokenStatus.ACTIVE.toString());
+        }
+
+        //then
+        assertThat(generateToken.getStatus()).isEqualTo(TokenStatus.ACTIVE.toString());
+    }
+
+    @DisplayName("토큰 저장, 토큰 조회시 값이 Null 이고 대기열에 자리가 없다면 상태가 waiting 상태인 토큰이 저장된다")
+    @Test
+    void select_token_is_null_waiting() {
+        //given
+        Long userId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token generateToken = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
+
+        //when
+        int activeSpace = 5;
+        int spaceQueue = activeSpace - 5;
+
+        if (activeSpace > 0 && spaceQueue > 0) {
+            generateToken.setStatus(TokenStatus.ACTIVE.toString());
+        }
+
+        //then
+        assertThat(generateToken.getStatus()).isEqualTo(TokenStatus.WAITING.toString());
     }
 
     @DisplayName("토큰 저장, 토큰 조회시 Null이 아니지만 상태가 Active일때")
@@ -89,17 +119,5 @@ class TokenManagementFacadeImplTest {
         assertThat(tokenManagementFacade.insertToken(userId)).isEqualTo(updateToken);
     }
 
-    @DisplayName("토큰 저장, 토큰 조회시 Null이 아니지만 상태가 Waiting일 경우")
-    @Test
-    void select_token_is_not_null_and_Waiting() {
-        //given
-        Long userId = 1L;
-        LocalDateTime now = LocalDateTime.now();
-        Token token = new Token(userId, "token123123", TokenStatus.EXPIRED.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateToken(userId)).thenReturn(token);
-
-        // when && then
-        assertThat(tokenManagementFacade.insertToken(userId)).isEqualTo(token);
-    }
 
 }

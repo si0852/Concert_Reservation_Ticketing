@@ -6,6 +6,7 @@ import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,7 +19,7 @@ public class TokenServiceImpl implements TokenService {
         String status = TokenStatus.WAITING.toString();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createdAt = now;
-        LocalDateTime expiresAt = now.plusMinutes(10);
+        LocalDateTime expiresAt = now.plusHours(1);
         return new Token(userId, token, status, createdAt, expiresAt);
     }
 
@@ -27,7 +28,7 @@ public class TokenServiceImpl implements TokenService {
         String status = TokenStatus.WAITING.toString();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createdAt = now;
-        LocalDateTime expiresAt = now.plusMinutes(10);
+        LocalDateTime expiresAt = now.plusHours(1);
         return new Token(userId, token, status, createdAt, expiresAt);
     }
 }
