@@ -16,5 +16,6 @@ public interface JpaTokenRepository extends JpaRepository<Token, Long> {
 
     Optional<Token> findByToken(String token);
 
-    List<Token> findAllByStatus(String status);
+    List<Token> findAllByStatusOrderByCreatedAt(String status);
+
 }

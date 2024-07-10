@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 @Component
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
@@ -60,4 +62,30 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
         return tokenQueueService.saveToken(generatedToken);
     }
+
+
+    @Override
+    public Integer getTokenPosition(Long userId) {
+        List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
+
+        // index 찾기
+        int index = IntStream.range(0, waitingToken.size())
+                .filter(data -> Objects.equals(waitingToken.get(data).getUserId(), userId))
+                .findFirst().orElse(-1);
+
+        if(waitingToken.get(index).getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
+        else if(waitingToken.get(index).getStatus().equals(TokenStatus.EXPIRED.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
+        return index+1;
+    }
+
+    @Override
+    public Token getTokenInfo(String token) {
+        Token tokenInfo = tokenQueueService.validateTokenByToken(token);
+        if(tokenInfo == null) throw new RuntimeException("토큰정보가 존재하지 않습니다.");
+        else if(tokenInfo.getStatus().equals(TokenStatus.EXPIRED.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
+        else if(tokenInfo.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
+        // 토큰 정보 - 롱폴링
+        return tokenInfo;
+    }
+
 }

@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -117,6 +119,67 @@ class TokenManagementFacadeImplTest {
 
         //then
         assertThat(tokenManagementFacade.insertToken(userId)).isEqualTo(updateToken);
+    }
+
+    @DisplayName("대기열 위치 찾기")
+    @Test
+    void find_index() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Token> list = List.of(
+                new Token(1L, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10)),
+                new Token(2L, "sadfasdfas2", TokenStatus.WAITING.toString(), now, now.plusMinutes(10)),
+                new Token(3L, "sdfasdf2123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10)),
+                new Token(4L, "asdfsdfs3xz", TokenStatus.WAITING.toString(), now, now.plusMinutes(10)),
+                new Token(5L, "vcvse323ass", TokenStatus.WAITING.toString(), now, now.plusMinutes(10)),
+                new Token(6L, "asdgseg32sa", TokenStatus.WAITING.toString(), now, now.plusMinutes(10))
+        );
+
+        int index = IntStream.range(0, list.size())
+                .filter(data -> Objects.equals(list.get(data).getUserId(), 2L))
+                .findFirst().orElse(-1);
+
+        assertEquals(1, index);
+    }
+
+    @DisplayName("폴링: 상태값 찾기 - 토큰 정보 null일떄")
+    @Test
+    void polling_find_status_null() {
+        //given
+        String token = "token123123";
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(null);
+
+        // when && then
+        assertThrows(RuntimeException.class, () -> {
+            tokenManagementFacade.getTokenInfo(token);
+        });
+    }
+
+    @DisplayName("폴링: 상태값 찾기 - 토큰 상태가 Expired 일때")
+    @Test
+    void polling_find_status_expired() {
+        //given
+        String token = "token123123";
+        Token tokenInfo = new Token(1L, token, TokenStatus.EXPIRED.toString(), null, null);
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenInfo);
+
+        // when && then
+        assertThrows(RuntimeException.class, () -> {
+            tokenManagementFacade.getTokenInfo(token);
+        });
+    }
+
+    @DisplayName("폴링: 상태값 찾기 - 토큰 상태가 Active 일때")
+    @Test
+    void polling_find_status_active() {
+        //given
+        String token = "token123123";
+        Token tokenInfo = new Token(1L, token, TokenStatus.ACTIVE.toString(), null, null);
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenInfo);
+
+        // when && then
+        assertThrows(RuntimeException.class, () -> {
+            tokenManagementFacade.getTokenInfo(token);
+        });
     }
 
 

@@ -43,6 +43,6 @@ public class TokenRepositoryImpl implements TokenRepository {
 
     @Override
     public List<Token> getTokenListByStatus(String status) {
-        return jpaTokenRepository.findAllByStatus(status);
+        return jpaTokenRepository.findAllByStatusOrderByCreatedAt(status);
     }
 }
