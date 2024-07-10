@@ -27,6 +27,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
+    public Reservation getReservationDataByReservationId(Long reservationId) {
+        return jpaReservationRepository.findById(reservationId).orElse(null);
+    }
+
+    @Override
     public Reservation update(Reservation reservation) {
         return jpaReservationRepository.save(reservation);
     }

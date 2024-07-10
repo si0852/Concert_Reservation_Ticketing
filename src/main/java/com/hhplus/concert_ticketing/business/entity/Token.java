@@ -31,4 +31,12 @@ public class Token {
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
     }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
+    }
 }

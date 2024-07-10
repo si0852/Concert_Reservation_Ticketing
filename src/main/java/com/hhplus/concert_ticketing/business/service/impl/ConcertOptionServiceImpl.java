@@ -38,6 +38,11 @@ public class ConcertOptionServiceImpl implements ConcertOptionService {
     }
 
     @Override
+    public ConcertOption getConcertOptionDataById(Long concertOptionid) {
+        return concertOptionRepository.getConcertOptionDataById(concertOptionid);
+    }
+
+    @Override
     public List<LocalDateTime> getConcertDate(Long concertId) {
         return concertOptionRepository.getConcertDate(concertId);
     }

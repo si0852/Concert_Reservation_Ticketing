@@ -14,4 +14,6 @@ public interface ReservationRepository {
 
     Reservation getReservationData(Long userId, Long seatId);
 
+    Reservation getReservationDataByReservationId(Long reservationId);
+
 }

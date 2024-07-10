@@ -10,5 +10,7 @@ public interface TokenRepository {
 
     Token getTokenByTokenId(Long tokenId);
 
+    Token getTokenByToken(String token);
+
     Token updateToken(Token Token);
 }
