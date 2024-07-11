@@ -6,6 +6,12 @@ import com.hhplus.concert_ticketing.presentation.dto.request.ReservationRequest;
 import com.hhplus.concert_ticketing.presentation.dto.response.*;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +28,67 @@ public class TicketingController {
     // 유저 토큰 발급 API
     // http://localhost:8080/api/token
     @PostMapping("/api/token")
-    public ResponseEntity<TokenResponse> generateToken(@RequestParam String userId) {
+    @Operation(summary = "유저 토큰 발급 API", description = "대기열을 위한 유저 토큰 발급 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "예약 진행중인 데이터가 존재합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "userId", description = "유저 id", example = "1")
+    })
+    public ResponseEntity<TokenResponse> generateToken(@RequestParam Long userId) {
         String token = "This_is_Token_mocked_token_for_" + userId; // 임시토큰형식
         TokenStatus status = TokenStatus.ACTIVE;
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // 만료시간이 1시간
 
+        TokenResponse response = TokenResponse.builder()
+                .token(token)
+                .queuePosition(11L)
+                .expired_at(expiresAt)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 유저 토큰 순번 Return API
+    // http://localhost:8080/api/token
+    @GetMapping("/api/token")
+    @Operation(summary = "유저 토큰 정보", description = "대기열의 토큰 순번 확인을 위한 토큰 정보 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "예약 진행중인 데이터가 존재합니다. / 토큰이 만료되었습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
+    })
+    public ResponseEntity<TokenResponse> getTokenWithPosition(@RequestParam String token) {
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // 만료시간이 1시간
+        TokenResponse response = TokenResponse.builder()
+                .token(token)
+                .queuePosition(11L)
+                .expired_at(expiresAt)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 유저 토큰 순번 Return API
+    // http://localhost:8080/api/token
+    @GetMapping("/api/tokenInfo")
+    @Operation(summary = "유저 토큰 정보", description = "토큰 상태 확인을 위한 토큰 정보 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "예약 진행중인 데이터가 존재합니다. / 토큰이 만료되었습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "토큰정보가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
+    })
+    public ResponseEntity<TokenResponse> getTokenInfo(@RequestParam String token) {
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // 만료시간이 1시간
         TokenResponse response = TokenResponse.builder()
                 .token(token)
                 .queuePosition(11L)
@@ -41,6 +103,17 @@ public class TicketingController {
     // http://localhost:8080/api/concert/1/available-dates
     @GetMapping("/api/concert/{concertId}/available-dates")
     @ResponseBody
+    @Operation(summary = "예약 가능 좌석/날짜 조회 API", description = "예약 가능한 날짜 및 좌석 조회 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "이미 예약진행중인 데이터가 존재합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "콘서트 정보가 없습니다./ 콘서트 상세 정보가 없습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
+            @Parameter(name = "concertId", description = "concertId 값", example = "1")
+    })
     public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
             @PathVariable Long concertId,
             @RequestParam String token
@@ -61,8 +134,18 @@ public class TicketingController {
 
 
     // 예약 가능 좌석 조회
-    // /api/concert/1/available-seats?date=2024-07-05
     @GetMapping("/api/concert/{concertOptionId}/available-seats")
+    @Operation(summary = "예약 가능 좌석 조회 API", description = "선택한 콘서트 예약 좌석 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "이미 예약진행중인 데이터가 존재합니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "오픈된 콘서트 정보가 없습니다./ 예약가능한 좌석이 없습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
+            @Parameter(name = "concertOptionId", description = "concertOptionId 값", example = "1")
+    })
     public ResponseEntity<List<SeatResponse>> getAvailableSeats(
             @RequestParam String token,
             @PathVariable Long concertOptionId
@@ -86,14 +169,20 @@ public class TicketingController {
     // 좌석 예약 요청 API
     /*
     http://localhost:8080/api/reserve
-    {
-    "userId": 12345,
-    "seatId": 67890,
-    "status": "WAITING"
-    }
     raw 타입 Json으로 꼭!!
     * */
     @PostMapping("/api/reserve")
+    @Operation(summary = "좌석 예약 요청 API", description = "선택한 콘서트 좌석 예약 요청")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "예약중인 정보 입니다./이미 예약진행중인 데이터가 존재합니다. / 토큰 정보가 유효하지 않습니다./예약된 좌석입니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "오픈된 콘서트 정보가 없습니다./ 예약가능한 좌석이 없습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
+            @Parameter(name = "seatId", description = "seatId 값", example = "1")
+    })
     public ResponseEntity<ReservationResponse> reserveSeat(
             @RequestBody ReservationRequest request) {
         ReservationResponse response = ReservationResponse.builder()
@@ -107,9 +196,18 @@ public class TicketingController {
     // 잔액 충전
     /*
     * http://localhost:8080/api/balance/charge
-
     * */
     @PatchMapping("/api/balance/charge")
+    @Operation(summary = "잔액 충전 API", description = "잔액 충전")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "400", description = "1000원 이상의 금액을 충전해주세요", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "userId", description = "userId", example = "1"),
+            @Parameter(name = "amount", description = "충전할 금액", example = "1000")
+    })
     public ResponseEntity<BalanceResponse> chargeBalance(@RequestBody BalanceRequest request) {
 
         return ResponseEntity.ok(BalanceResponse.builder()
@@ -120,6 +218,14 @@ public class TicketingController {
     // 잔액 조회
     // http://localhost:8080/api/balance?userId=1
     @GetMapping("/api/balance")
+    @Operation(summary = "잔액 조회 API", description = "잔액 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "userId", description = "userId", example = "1"),
+    })
     public ResponseEntity<BalanceResponse> getBalance(@RequestParam Long userId) {
         return ResponseEntity.ok(BalanceResponse.builder()
                 .totalBalance(10000L)
@@ -128,6 +234,17 @@ public class TicketingController {
 
     // 결제 API
     @PostMapping("/api/pay")
+    @Operation(summary = "결제 API", description = "예약된 좌석 결제")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "토큰정보가 없습니다. / 예약시간이 만료되었습니다./ 유저가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "예약정보가 없습니다./좌석 정보가 없습니다./콘서트 옵션 데이터가 존재하지 않습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "500", description = "서버에러", content = @Content(mediaType = "application/json"))
+    })
+    @Parameters({
+            @Parameter(name = "reservationId", description = "reservationId", example = "1"),
+            @Parameter(name = "token", description = "token", example = "asdfasdfa123")
+    })
     public ResponseEntity<PaymentResponse> processPayment(
             @RequestBody PaymentRequest request) {
         return ResponseEntity.ok(PaymentResponse.builder()
