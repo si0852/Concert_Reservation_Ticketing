@@ -25,7 +25,7 @@ public class Reservation {
     Long userId;
     @NotNull
     Long seatId;
-    @NotBlank
+
     String status; // 예약중, 결제됨, 예약취소
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

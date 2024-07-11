@@ -12,6 +12,8 @@ public interface ReservationRepository {
 
     List<Reservation> getReservationData(Long userId);
 
+    List<Reservation> getReservationData(String status);
+
     Reservation getReservationData(Long userId, Long seatId);
 
     Reservation getReservationDataByReservationId(Long reservationId);

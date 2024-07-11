@@ -32,6 +32,11 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public List<Reservation> getReservationDataByStatus(String status) {
+        return reservationRepository.getReservationData(status);
+    }
+
+    @Override
     public Reservation getReservationDataByReservationId(Long reservationId) {
         return reservationRepository.getReservationDataByReservationId(reservationId);
     }

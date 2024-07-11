@@ -40,4 +40,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     public List<Reservation> getReservationData(Long userId) {
         return jpaReservationRepository.findAllByUserId(userId);
     }
+
+    @Override
+    public List<Reservation> getReservationData(String status) {
+        return jpaReservationRepository.findAllByStatus(status);
+    }
 }

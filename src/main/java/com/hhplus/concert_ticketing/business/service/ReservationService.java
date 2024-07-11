@@ -12,6 +12,8 @@ public interface ReservationService {
 
     public List<Reservation> getReservationDataByUserId(Long userId);
 
+    public List<Reservation> getReservationDataByStatus(String status);
+
     public Reservation getReservationDataByReservationId(Long reservationId);
 
     public Reservation UpdateReservationData(Reservation reservation);
