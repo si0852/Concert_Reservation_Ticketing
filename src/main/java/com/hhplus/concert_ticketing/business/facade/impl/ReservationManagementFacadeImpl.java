@@ -10,11 +10,13 @@ import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Component
 public class ReservationManagementFacadeImpl implements ReservationManagementFacade {
 
     private final TokenQueueService tokenQueueService;
@@ -43,16 +45,18 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
 
         // 예약 정보 확인
         Reservation reservationData = reservationService.getReservationData(token.getUserId(), seatId);
-        // 예약 정보 상태가 취소가 아니면(예약중이거나 결제 이면) RuntimeException
-        String status = reservationData.getStatus();
-        if(reservationData != null &&
-                (status.equals(ReservationStatus.PAID.toString()) || status.equals(ReservationStatus.WAITING.toString()))) throw new RuntimeException("예약중인 정보입니다.");
 
-        // 예약 정보 상태가 취소이면 상태값 변경
-        if(reservationData != null && reservationData.getStatus().equals(ReservationStatus.CANCELLED.toString())) {
-            reservationData.setStatus(ReservationStatus.WAITING.toString());
-        // 예약 정보가 없으면 예약정보 생성
-        } else if (reservationData == null) {
+
+        if (reservationData != null) {
+            String status = reservationData.getStatus();
+            // 예약 정보 상태가 취소가 아니면(예약중이거나 결제 이면) RuntimeException
+            if (status.equals(ReservationStatus.PAID.toString()) || status.equals(ReservationStatus.WAITING.toString()))throw new RuntimeException("예약중인 정보입니다.");
+            // 예약 정보 상태가 취소이면 상태값 변경
+            else if(reservationData.getStatus().equals(ReservationStatus.CANCELLED.toString())){
+                reservationData.setStatus(ReservationStatus.WAITING.toString());
+            }
+        }
+        if (reservationData == null) {
             LocalDateTime now = token.getCreatedAt();
             reservationData = new Reservation(token.getUserId(), seatId, ReservationStatus.WAITING.toString(), now, now.plusMinutes(5));
         }
