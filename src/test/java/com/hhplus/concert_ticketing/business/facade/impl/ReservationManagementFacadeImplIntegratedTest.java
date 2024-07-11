@@ -66,7 +66,7 @@ class ReservationManagementFacadeImplIntegratedTest {
         Reservation reservation = reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
 
         //then
-        Reservation reservationDataByReservationId = reservationService.getReservationDataByReservationId(1L);
+        Reservation reservationDataByReservationId = reservationService.getReservationDataByReservationId(reservation.getReservationId());
         assertThat(reservationDataByReservationId.getReservationId()).isEqualTo(reservation.getReservationId());
 
     }

@@ -12,6 +12,9 @@ import com.hhplus.concert_ticketing.business.service.TokenService;
 import com.hhplus.concert_ticketing.business.service.impl.ConcertOptionServiceImpl;
 import com.hhplus.concert_ticketing.business.service.impl.ConcertServiceImpl;
 import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
+import com.hhplus.concert_ticketing.infra.JpaConcertOptionRepository;
+import com.hhplus.concert_ticketing.infra.JpaConcertRepository;
+import com.hhplus.concert_ticketing.infra.JpaTokenRepository;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,28 +52,31 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     @Autowired
     ConcertService concertService;
 
+    @Autowired
+    JpaTokenRepository tokenRepository;
+
+    @Autowired
+    JpaConcertRepository jpaConcertRepository;
+
+    @Autowired
+    JpaConcertOptionRepository jpaConcertOptionRepository;
+
     @BeforeEach
     void set_up() {
-
-        Token token = tokenService.generateToken(1L);
-        Token token1 = tokenService.generateToken(2L);
-        Token token2 = tokenService.generateToken(3L);
-        Token token3 = tokenService.generateToken(4L);
-        Token token4 = tokenService.generateToken(5L);
-
-        tokenQueueService.saveToken(token);
-        tokenQueueService.saveToken(token1);
-        tokenQueueService.saveToken(token2);
-        tokenQueueService.saveToken(token3);
-        tokenQueueService.saveToken(token4);
-
+        tokenRepository.deleteAll();
+        jpaConcertRepository.deleteAll();
+        jpaConcertOptionRepository.deleteAll();
     }
+
 
     @DisplayName("logicTest: 토큰상태가 Waiting 일때")
     @Test
     void test_token_status_is_active() {
         //given
-        Token token = tokenQueueService.validateTokenByTokenId(1L);
+        Token tokenInfo = tokenService.generateToken(1L);
+        Token saveToken = tokenQueueService.saveToken(tokenInfo);
+
+        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
         token.setStatus(TokenStatus.WAITING.toString());
         tokenQueueService.updateToken(token);
         Long concertId = 1L;
@@ -85,7 +91,10 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     @Test
     void test_no_concert_info() {
         //given
-        Token token = tokenQueueService.validateTokenByTokenId(2L);
+        Token token1 = tokenService.generateToken(2L);
+        Token saveToken = tokenQueueService.saveToken(token1);
+
+        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
         token.setStatus(TokenStatus.ACTIVE.toString());
         tokenQueueService.updateToken(token);
         Long concertId = 1L;
@@ -100,7 +109,9 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     @Test
     void test_no_concert_option_info() {
         //given
-        Token token = tokenQueueService.validateTokenByTokenId(2L);
+        Token token1 = tokenService.generateToken(3L);
+        Token saveToken = tokenQueueService.saveToken(token1);
+        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
         token.setStatus(TokenStatus.ACTIVE.toString());
         tokenQueueService.updateToken(token);
 
@@ -118,7 +129,9 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     @Test
     void logic_test() {
         //given
-        Token token = tokenQueueService.validateTokenByTokenId(2L);
+        Token token1 = tokenService.generateToken(4L);
+        Token saveToken = tokenQueueService.saveToken(token1);
+        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
         token.setStatus(TokenStatus.ACTIVE.toString());
         tokenQueueService.updateToken(token);
 

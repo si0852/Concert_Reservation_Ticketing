@@ -22,23 +22,13 @@ class ChargeManagementFacadeImplIntegratedTest {
     CustomerService customerService;
 
 
-    @BeforeEach
-    void set_up() {
-        Customer customer = new Customer("sihyun", 0.0);
-        Customer customer2 = new Customer("sihyun2", 0.0);
-        Customer customer3 = new Customer("sihyun3", 0.0);
-        Customer customer4 = new Customer("sihyun4", 0.0);
-        customerService.saveCustomer(customer);
-        customerService.saveCustomer(customer2);
-        customerService.saveCustomer(customer3);
-        customerService.saveCustomer(customer4);
-    }
-
     @DisplayName("요청 금액이 1000보다 작을경우")
     @Test
     void validation_request_amount() {
         //given
-        Long userId = 1L;
+        Customer customer = new Customer("sihyun", 0.0);
+        Customer saveCustomer = customerService.saveCustomer(customer);
+        Long userId = saveCustomer.getCustomerId();
         Double amount = 900.0;
 
         // when && then
@@ -52,12 +42,13 @@ class ChargeManagementFacadeImplIntegratedTest {
     @Test
     void update_check() {
         //given
-        Long userId = 1L;
         Double amount = 1900.0;
+        Customer customer2 = new Customer("sihyun2", 0.0);
+        Customer saveCustomer = customerService.saveCustomer(customer2);
 
         // when
-        chargeManagementFacade.chargingPoint(userId, amount);
-        Customer customerData = chargeManagementFacade.getCustomerData(1L);
+        chargeManagementFacade.chargingPoint(saveCustomer.getCustomerId(), amount);
+        Customer customerData = chargeManagementFacade.getCustomerData(saveCustomer.getCustomerId());
 
         // then
         assertThat(customerData.getBalance()).isEqualTo(1900.0);
