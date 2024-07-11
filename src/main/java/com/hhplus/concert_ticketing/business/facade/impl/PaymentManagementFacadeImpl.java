@@ -6,10 +6,12 @@ import com.hhplus.concert_ticketing.business.service.*;
 import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+@Component
 public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
 
     private final TokenQueueService tokenQueueService;
@@ -99,6 +101,10 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         // ---> 결재
         Payment payment = new Payment(reservationId, ticketPrice, LocalDateTime.now());
         Payment paymentResult = paymentService.savePayment(payment);
+
+        // ---> 예약
+        validationReservationInfo.setStatus(ReservationStatus.PAID.toString());
+        reservationService.UpdateReservationData(validationReservationInfo);
 
         // ---> 토큰 만료
         validateToken.setStatus(TokenStatus.EXPIRED.toString());
