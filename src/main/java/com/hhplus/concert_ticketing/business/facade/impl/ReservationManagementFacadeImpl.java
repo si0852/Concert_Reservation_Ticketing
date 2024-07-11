@@ -29,9 +29,9 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
 
     @Transactional
     @Override
-    public Reservation reservationProgress(Long tokenId, Long seatId) {
+    public Reservation reservationProgress(String tokenData, Long seatId) {
         // 토큰 확인
-        Token token = tokenQueueService.validateTokenByTokenId(tokenId);
+        Token token = tokenQueueService.validateTokenByToken(tokenData);
         // 토큰 상태가 ACTIVE이면 RuntimeException
         if(token != null && !token.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("토큰 정보가 유효하지 않습니다.");
 

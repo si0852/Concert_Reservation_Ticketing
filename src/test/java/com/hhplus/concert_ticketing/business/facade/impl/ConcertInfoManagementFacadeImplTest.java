@@ -2,8 +2,11 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Concert;
 import com.hhplus.concert_ticketing.business.entity.ConcertOption;
+import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.business.service.impl.ConcertOptionServiceImpl;
 import com.hhplus.concert_ticketing.business.service.impl.ConcertServiceImpl;
+import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
+import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,43 +36,55 @@ class ConcertInfoManagementFacadeImplTest {
     ConcertOptionServiceImpl concertOptionService;
 
     @Mock
+    TokenQueueServiceImpl tokenQueueService;
+
+    @Mock
     ConcertServiceImpl concertService;
+
+    @DisplayName("콘서트 유효성 체크, 토큰 유효성 체크")
+    @Test
+    void checking_concert_is_token_check() {
+        //given
+        String token = "asdfasdfsa";
+        Long concertId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token t = new Token(1L, token, TokenStatus.EXPIRED.toString(), now, now.plusHours(1));
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(t);
+
+        //when && then
+        assertThrows(RuntimeException.class, () -> {
+            concertInfoManagementFacade.getConcertOption(token, concertId);
+        });
+    }
 
 
     @DisplayName("콘서트 유효성 체크, Concert가 null일 경우")
     @Test
     void checking_concert_is_null() {
         //given
-        Long tokenId = 1L;
+        String token = "asdfasdfsa";
         Long concertId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token t = new Token(1L, token, TokenStatus.ACTIVE.toString(), now, now.plusHours(1));
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(t);
         when(concertService.getConcertData(concertId)).thenReturn(null);
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(tokenId, concertId);
+            concertInfoManagementFacade.getConcertOption(token, concertId);
         });
     }
 
-    @DisplayName("콘서트 유효성 체크, Concert가 null일 경우 (토큰 상태가 만료일 경우)")
-    @Test
-    void checking_concert_is_null2() {
-        //given
-        Long tokenId = 1L;
-        Long concertId = 1L;
-        when(concertService.getConcertData(concertId)).thenReturn(null);
-
-        //when && then
-        assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(tokenId, concertId);
-        });
-    }
 
     @DisplayName("콘서트 옵션 체크, ConcertOption 리스트 크기가 0일 경우")
     @Test
     void checking_concertOption_list_size_0() {
         //given
-        Long tokenId = 1L;
+        String token = "asdfasdfsa";
         Long concertId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token t = new Token(1L, token, TokenStatus.ACTIVE.toString(), now, now.plusHours(1));
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(t);
         Concert concert = new Concert("콘서트");
         when(concertService.getConcertData(concertId)).thenReturn(concert);
 
@@ -79,7 +94,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         //then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(tokenId, concertId);
+            concertInfoManagementFacade.getConcertOption(token, concertId);
         });
     }
 
@@ -87,9 +102,11 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concertOption_list_size_1() {
         //given
-        Long tokenId = 1L;
+        String token = "asdfasdfsa";
         Long concertId = 1L;
         LocalDateTime now = LocalDateTime.now();
+        Token t = new Token(1L, token, TokenStatus.ACTIVE.toString(), now, now.plusHours(1));
+        when(tokenQueueService.validateTokenByToken(token)).thenReturn(t);
         Concert concert = new Concert("콘서트");
         when(concertService.getConcertData(concertId)).thenReturn(concert);
 
@@ -101,7 +118,7 @@ class ConcertInfoManagementFacadeImplTest {
         );
 
         when(concertOptionService.getConcertOptionData(concertId)).thenReturn(concertOptionList);
-        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(tokenId, concertId);
+        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(token, concertId);
         //then
         assertThat(concertOption).isEqualTo(concertOptionList);
     }

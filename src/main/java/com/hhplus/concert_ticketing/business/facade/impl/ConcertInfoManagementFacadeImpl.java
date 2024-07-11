@@ -29,15 +29,15 @@ public class ConcertInfoManagementFacadeImpl implements ConcertInfoManagementFac
 
     @Transactional
     @Override
-    public List<ConcertOption> getConcertOption(Long tokenId, Long concertId) {
-        Token token = tokenQueueService.validateTokenByTokenId(tokenId);
+    public List<ConcertOption> getConcertOption(String tokendata, Long concertId) {
+        Token token = tokenQueueService.validateTokenByToken(tokendata);
         if(token != null && !token.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("이미 예약진행중인 데이터가 존재합니다.");
 
         Concert concertData = concertService.getConcertData(concertId);
         if (concertData == null) throw new RuntimeException("콘서트 정보가 없습니다.");
 
         List<ConcertOption> concertOptionData = concertOptionService.getConcertOptionData(concertId);
-        if(concertOptionData.size() == 0) throw new RuntimeException("콘서트 정보가 없습니다.");
+        if(concertOptionData.size() == 0) throw new RuntimeException("콘서트 상세 정보가 없습니다.");
 
         return concertOptionData;
     }

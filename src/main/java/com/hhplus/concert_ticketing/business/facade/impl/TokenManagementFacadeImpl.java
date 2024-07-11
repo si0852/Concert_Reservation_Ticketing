@@ -65,12 +65,12 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
 
     @Override
-    public Integer getTokenPosition(Long userId) {
+    public Integer getTokenPosition(String token) {
         List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
         // index 찾기
         int index = IntStream.range(0, waitingToken.size())
-                .filter(data -> Objects.equals(waitingToken.get(data).getUserId(), userId))
+                .filter(data -> Objects.equals(waitingToken.get(data).getToken(), token))
                 .findFirst().orElse(-1);
 
         if(waitingToken.get(index).getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");

@@ -52,15 +52,15 @@ class ReservationManagementFacadeImplTest {
     void reservation_token_valid_check() {
         //given
         Long seatId = 1L;
-        Long tokenId = 1L;
+        String tokendata = "Adfasdfs11";
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokendata)).thenReturn(token);
 
         //when&&then
         assertThrows(RuntimeException.class, () -> {
-            reservationManagementFacade.reservationProgress(tokenId, seatId);
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
         });
     }
 
@@ -69,11 +69,11 @@ class ReservationManagementFacadeImplTest {
     void reservation_info_valid_check_user() {
         //given
         Long seatId = 1L;
-        Long tokenId = 1L;
+        String tokendata = "Adfasdfs11";
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokendata)).thenReturn(token);
 
         List<Reservation> reservationList = new ArrayList<>();
         reservationList.add(new Reservation(1L, 1L, ReservationStatus.WAITING.toString(), now, now.plusMinutes(5)));
@@ -85,7 +85,7 @@ class ReservationManagementFacadeImplTest {
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            reservationManagementFacade.reservationProgress(tokenId, seatId);
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
         });
     }
 
@@ -94,11 +94,11 @@ class ReservationManagementFacadeImplTest {
     void reservation_info_valid_check() {
         //given
         Long seatId = 1L;
-        Long tokenId = 1L;
+        String tokendata = "Adfasdfs11";
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokendata)).thenReturn(token);
 
         when(reservationService.getReservationDataByUserId(userId)).thenReturn(List.of());
 
@@ -110,7 +110,7 @@ class ReservationManagementFacadeImplTest {
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            reservationManagementFacade.reservationProgress(tokenId, seatId);
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
         });
     }
 

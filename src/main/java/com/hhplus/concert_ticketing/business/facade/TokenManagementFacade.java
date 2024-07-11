@@ -6,7 +6,7 @@ public interface TokenManagementFacade {
 
     Token insertToken(Long userId);
 
-    Integer getTokenPosition(Long userId);
+    Integer getTokenPosition(String token);
 
     Token getTokenInfo(String token);
 }
