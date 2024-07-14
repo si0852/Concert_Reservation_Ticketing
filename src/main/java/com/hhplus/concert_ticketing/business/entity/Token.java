@@ -1,6 +1,8 @@
 package com.hhplus.concert_ticketing.business.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 @ToString
 public class Token {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Long tokenId;
     @NotNull
     Long userId;

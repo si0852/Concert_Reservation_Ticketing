@@ -32,9 +32,9 @@ public class SeatManagementFacadeIml implements SeatManagementFacade {
     }
 
     @Override
-    public List<Seat> getSeatData(Long concertOptionId, Long tokenId) {
+    public List<Seat> getSeatData(Long concertOptionId, String tokend) {
 
-        Token token = tokenQueueService.validateTokenByTokenId(tokenId);
+        Token token = tokenQueueService.validateTokenByToken(tokend);
         if(token != null && !token.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("이미 예약진행중인 데이터가 존재합니다.");
 
         ConcertOption concertOptionData = concertOptionService.getConcertOptionDataByLocalDate(concertOptionId);
