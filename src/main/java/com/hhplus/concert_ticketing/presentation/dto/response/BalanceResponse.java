@@ -6,10 +6,10 @@ import lombok.Getter;
 @Getter
 public class BalanceResponse {
 
-    Long totalBalance;
+    Double totalBalance;
 
     @Builder
-    public BalanceResponse(Long totalBalance) {
+    public BalanceResponse(Double totalBalance) {
         this.totalBalance = totalBalance;
     }
 }

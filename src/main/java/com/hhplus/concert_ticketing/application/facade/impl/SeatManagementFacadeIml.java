@@ -1,9 +1,9 @@
-package com.hhplus.concert_ticketing.business.facade.impl;
+package com.hhplus.concert_ticketing.application.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.ConcertOption;
 import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.facade.SeatManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.SeatManagementFacade;
 import com.hhplus.concert_ticketing.business.service.ConcertOptionService;
 import com.hhplus.concert_ticketing.business.service.SeatService;
 import com.hhplus.concert_ticketing.business.service.TokenQueueService;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Component

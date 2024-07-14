@@ -1,11 +1,11 @@
 package com.hhplus.concert_ticketing.presentation;
 
+import com.hhplus.concert_ticketing.application.facade.*;
+import com.hhplus.concert_ticketing.business.entity.*;
 import com.hhplus.concert_ticketing.presentation.dto.request.BalanceRequest;
 import com.hhplus.concert_ticketing.presentation.dto.request.PaymentRequest;
 import com.hhplus.concert_ticketing.presentation.dto.request.ReservationRequest;
 import com.hhplus.concert_ticketing.presentation.dto.response.*;
-import com.hhplus.concert_ticketing.status.SeatStatus;
-import com.hhplus.concert_ticketing.status.TokenStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,23 @@ import java.util.List;
 @RestController
 public class TicketingController {
 
+    private final ChargeManagementFacade chargeManagementFacade;
+    private final ConcertInfoManagementFacade concertInfoManagementFacade;
+    private final PaymentManagementFacade paymentManagementFacade;
+    private final ReservationManagementFacade reservationManagementFacade;
+    private final ScheduleManagementFacade scheduleManagementFacade;
+    private final SeatManagementFacade seatManagementFacade;
+    private final TokenManagementFacade tokenManagementFacade;
+
+    public TicketingController(ChargeManagementFacade chargeManagementFacade, ConcertInfoManagementFacade concertInfoManagementFacade, PaymentManagementFacade paymentManagementFacade, ReservationManagementFacade reservationManagementFacade, ScheduleManagementFacade scheduleManagementFacade, SeatManagementFacade seatManagementFacade, TokenManagementFacade tokenManagementFacade) {
+        this.chargeManagementFacade = chargeManagementFacade;
+        this.concertInfoManagementFacade = concertInfoManagementFacade;
+        this.paymentManagementFacade = paymentManagementFacade;
+        this.reservationManagementFacade = reservationManagementFacade;
+        this.scheduleManagementFacade = scheduleManagementFacade;
+        this.seatManagementFacade = seatManagementFacade;
+        this.tokenManagementFacade = tokenManagementFacade;
+    }
 
     // 유저 토큰 발급 API
     // http://localhost:8080/api/token
@@ -38,14 +56,13 @@ public class TicketingController {
             @Parameter(name = "userId", description = "유저 id", example = "1")
     })
     public ResponseEntity<TokenResponse> generateToken(@RequestParam Long userId) {
-        String token = "This_is_Token_mocked_token_for_" + userId; // 임시토큰형식
-        TokenStatus status = TokenStatus.ACTIVE;
-        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // 만료시간이 1시간
+        Token token = tokenManagementFacade.insertToken(userId);
+        Integer tokenPosition = tokenManagementFacade.getTokenPosition(token.getToken());
 
         TokenResponse response = TokenResponse.builder()
-                .token(token)
-                .queuePosition(11L)
-                .expired_at(expiresAt)
+                .token(token.getToken())
+                .queuePosition(tokenPosition)
+                .expired_at(token.getExpiresAt())
                 .build();
 
         return ResponseEntity.ok(response);
@@ -63,15 +80,9 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<TokenResponse> getTokenWithPosition(@RequestParam String token) {
-        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // 만료시간이 1시간
-        TokenResponse response = TokenResponse.builder()
-                .token(token)
-                .queuePosition(11L)
-                .expired_at(expiresAt)
-                .build();
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Integer> getTokenWithPosition(@RequestParam String token) {
+        Integer tokenPosition = tokenManagementFacade.getTokenPosition(token);
+        return ResponseEntity.ok(tokenPosition);
     }
 
     // 유저 토큰 순번 Return API
@@ -87,15 +98,10 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<TokenResponse> getTokenInfo(@RequestParam String token) {
-        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5); // 만료시간이 1시간
-        TokenResponse response = TokenResponse.builder()
-                .token(token)
-                .queuePosition(11L)
-                .expired_at(expiresAt)
-                .build();
+    public ResponseEntity<Token> getTokenInfo(@RequestParam String token) {
+        Token tokenInfo = tokenManagementFacade.getTokenInfo(token);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(tokenInfo);
     }
 
 
@@ -118,18 +124,22 @@ public class TicketingController {
             @PathVariable Long concertId,
             @RequestParam String token
     ) {
+
+        List<ConcertOption> concertOptions = concertInfoManagementFacade.getConcertOption(token, concertId);
         log.info("you entered concertOptionId :: " + concertId);
-        List<ConcertDateResponse> dummyDataList = new ArrayList<>();
-        // for 문을 이용해 더미 데이터 생성
-        for (int i = 1; i <= 10; i++) {
+        List<ConcertDateResponse> responseData = new ArrayList<>();
+
+        for(ConcertOption concertOption : concertOptions) {
+            LocalDateTime concertDate = concertOption.getConcertDate();
+            String date = concertDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + concertDate.getHour() + concertDate.getMinute();
             ConcertDateResponse dummyData = ConcertDateResponse.builder()
-                    .concertOptionId((long)i)
-                    .concertDate("2024-07-" + String.format("%02d", i))
+                    .concertOptionId(concertOption.getConcertOptionId())
+                    .concertDate(date)
                     .build();
-            dummyDataList.add(dummyData);
+            responseData.add(dummyData);
         }
 
-        return ResponseEntity.ok(dummyDataList);
+        return ResponseEntity.ok(responseData);
     }
 
 
@@ -150,18 +160,12 @@ public class TicketingController {
             @RequestParam String token,
             @PathVariable Long concertOptionId
     ) {
-        log.info("you entered concertOptionId :: " + concertOptionId);
+        List<Seat> seatData = seatManagementFacade.getSeatData(concertOptionId, token);
         List<SeatResponse> seatResponses = new ArrayList<>();
 
-        for (int i = 1; i <= 10; i++) {
-            SeatResponse seatResponse = new SeatResponse(
-                    (long) i,
-                    "Seat " + i,
-                    SeatStatus.AVAILABLE
-            );
-            seatResponses.add(seatResponse);
+        for (Seat seat : seatData) {
+            seatResponses.add(new SeatResponse(seat.getSeatId(), seat.getSeatNumber(), seat.getSeatStatus()));
         }
-
         return ResponseEntity.ok(seatResponses);
     }
 
@@ -185,8 +189,9 @@ public class TicketingController {
     })
     public ResponseEntity<ReservationResponse> reserveSeat(
             @RequestBody ReservationRequest request) {
+        Reservation reservation = reservationManagementFacade.reservationProgress(request.getToken(), request.getSeatId());
         ReservationResponse response = ReservationResponse.builder()
-                .reservationId(1L)
+                .reservationId(reservation.getReservationId())
                 .build();
 
         return ResponseEntity.ok(response);
@@ -209,9 +214,9 @@ public class TicketingController {
             @Parameter(name = "amount", description = "충전할 금액", example = "1000")
     })
     public ResponseEntity<BalanceResponse> chargeBalance(@RequestBody BalanceRequest request) {
-
+        Customer customer = chargeManagementFacade.chargingPoint(request.getUserId(), request.getAmount());
         return ResponseEntity.ok(BalanceResponse.builder()
-                .totalBalance(request.getAmount()+1000)
+                .totalBalance(customer.getBalance())
                 .build());
     }
 
@@ -227,10 +232,11 @@ public class TicketingController {
             @Parameter(name = "userId", description = "userId", example = "1"),
     })
     public ResponseEntity<BalanceResponse> getBalance(@RequestParam Long userId) {
+        Customer customerData = chargeManagementFacade.getCustomerData(userId);
         return ResponseEntity.ok(BalanceResponse.builder()
-                .totalBalance(10000L)
+                .totalBalance(customerData.getBalance())
                 .build());
-    }//getBalance
+    }
 
     // 결제 API
     @PostMapping("/api/pay")
@@ -247,9 +253,9 @@ public class TicketingController {
     })
     public ResponseEntity<PaymentResponse> processPayment(
             @RequestBody PaymentRequest request) {
+        Payment payment = paymentManagementFacade.paymentProgress(request.getReservationId(), request.getToken());
         return ResponseEntity.ok(PaymentResponse.builder()
-                .paymentId(1L)
+                .paymentId(payment.getPaymentId())
                 .build());
-    }//processPayment
-
-}//end
+    }
+}

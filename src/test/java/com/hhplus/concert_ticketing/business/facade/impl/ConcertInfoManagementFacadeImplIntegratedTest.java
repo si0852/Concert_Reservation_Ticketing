@@ -2,16 +2,12 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Concert;
 import com.hhplus.concert_ticketing.business.entity.ConcertOption;
-import com.hhplus.concert_ticketing.business.entity.Customer;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.facade.ConcertInfoManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.ConcertInfoManagementFacade;
 import com.hhplus.concert_ticketing.business.service.ConcertOptionService;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
-import com.hhplus.concert_ticketing.business.service.impl.ConcertOptionServiceImpl;
-import com.hhplus.concert_ticketing.business.service.impl.ConcertServiceImpl;
-import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +22,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 
 @SpringBootTest

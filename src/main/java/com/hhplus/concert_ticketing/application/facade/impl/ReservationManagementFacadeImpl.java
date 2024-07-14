@@ -1,20 +1,22 @@
-package com.hhplus.concert_ticketing.business.facade.impl;
+package com.hhplus.concert_ticketing.application.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Reservation;
 import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.facade.ReservationManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
 import com.hhplus.concert_ticketing.business.service.SeatService;
 import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Component
 public class ReservationManagementFacadeImpl implements ReservationManagementFacade {
 
     private final TokenQueueService tokenQueueService;

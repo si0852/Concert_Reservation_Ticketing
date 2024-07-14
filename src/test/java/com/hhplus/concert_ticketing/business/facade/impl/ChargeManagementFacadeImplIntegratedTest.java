@@ -1,9 +1,8 @@
 package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Customer;
-import com.hhplus.concert_ticketing.business.facade.ChargeManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.ChargeManagementFacade;
 import com.hhplus.concert_ticketing.business.service.CustomerService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
