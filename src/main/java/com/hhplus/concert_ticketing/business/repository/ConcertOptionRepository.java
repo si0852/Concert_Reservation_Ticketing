@@ -11,6 +11,10 @@ public interface ConcertOptionRepository {
 
     ConcertOption update(ConcertOption concertOption);
 
+    ConcertOption getConcertOptionDataByLocalDate(Long concertOptionId);
+
+    ConcertOption getConcertOptionDataById(Long concertOptionId);
+
     List<ConcertOption> getConcertOptionData(Long concertId);
 
     List<LocalDateTime> getConcertDate(Long concertId);

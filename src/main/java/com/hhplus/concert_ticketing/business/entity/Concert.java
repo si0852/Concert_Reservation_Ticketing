@@ -20,7 +20,7 @@ public class Concert {
     Long concertId;
     String name;
 
-    public void setName(String name) {
+    public Concert(String name) {
         this.name = name;
     }
 }

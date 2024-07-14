@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.SeatRepository;
 import com.hhplus.concert_ticketing.business.service.SeatService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SeatServiceImpl implements SeatService {
 
@@ -20,8 +22,13 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public Seat getSeatData(Long concertOptionId) {
-        return seatRepository.getSeatData(concertOptionId);
+    public List<Seat> getSeatData(Long concertOptionId, String status) {
+        return seatRepository.getSeatData(concertOptionId, status);
+    }
+
+    @Override
+    public Seat getSeatOnlyData(Long seatId) {
+        return seatRepository.getSeatData(seatId);
     }
 
     @Override

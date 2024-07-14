@@ -25,7 +25,7 @@ public class Reservation {
     Long userId;
     @NotNull
     Long seatId;
-    @NotBlank
+
     String status; // 예약중, 결제됨, 예약취소
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
@@ -35,6 +35,18 @@ public class Reservation {
         this.seatId = seatId;
         this.status = status;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

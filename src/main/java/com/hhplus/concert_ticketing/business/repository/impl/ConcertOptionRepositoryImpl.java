@@ -33,6 +33,16 @@ public class ConcertOptionRepositoryImpl implements ConcertOptionRepository {
     }
 
     @Override
+    public ConcertOption getConcertOptionDataByLocalDate(Long concertOptionId) {
+        return jpaConcertOptionRepository.findByConcertOptionIdAndConcertDateGreaterThanEqual(concertOptionId, LocalDateTime.now()).orElse(null);
+    }
+
+    @Override
+    public ConcertOption getConcertOptionDataById(Long concertOptionId) {
+        return jpaConcertOptionRepository.findById(concertOptionId).orElse(null);
+    }
+
+    @Override
     public List<LocalDateTime> getConcertDate(Long concertId) {
         return jpaConcertOptionRepository.findConcertDateByConcertId(concertId);
     }

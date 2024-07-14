@@ -6,12 +6,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Token {
     @Id
     Long tokenId;
@@ -27,6 +29,14 @@ public class Token {
         this.token = token;
         this.status = status;
         this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
         this.expiresAt = expiresAt;
     }
 }

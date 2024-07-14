@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.TokenRepository;
 import com.hhplus.concert_ticketing.infra.JpaTokenRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class TokenRepositoryImpl implements TokenRepository {
 
@@ -25,7 +27,22 @@ public class TokenRepositoryImpl implements TokenRepository {
     }
 
     @Override
+    public Token getTokenByTokenId(Long tokenId) {
+        return jpaTokenRepository.findByTokenId(tokenId).orElse(null);
+    }
+
+    @Override
+    public Token getTokenByToken(String token) {
+        return jpaTokenRepository.findByToken(token).orElse(null);
+    }
+
+    @Override
     public Token updateToken(Token token) {
         return jpaTokenRepository.save(token);
+    }
+
+    @Override
+    public List<Token> getTokenListByStatus(String status) {
+        return jpaTokenRepository.findAllByStatusOrderByCreatedAt(status);
     }
 }

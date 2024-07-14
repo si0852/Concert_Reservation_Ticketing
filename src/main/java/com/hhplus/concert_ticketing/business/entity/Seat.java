@@ -23,16 +23,20 @@ public class Seat {
     @NotBlank
     String seatNumber;
     @NotBlank
-    String status; // 잠김, 열림
+    String seatStatus; // 잠김, 열림
 
     public Seat(Long concertOptionId, String seatNumber, String status) {
         this.concertOptionId = concertOptionId;
         this.seatNumber = seatNumber;
-        this.status = status;
+        this.seatStatus = status;
+    }
+
+    public void setSeatStatus(String seatStatus) {
+        this.seatStatus = seatStatus;
     }
 
     public boolean isAvailableSeat() {
-        if(this.status.equals("Lock")) return false;
+        if(this.seatStatus.equals("Lock")) return false;
         return true;
     }
 }

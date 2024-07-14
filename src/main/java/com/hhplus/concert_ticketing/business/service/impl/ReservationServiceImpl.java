@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.ReservationRepository;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ReservationServiceImpl implements ReservationService {
 
@@ -22,6 +24,21 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation getReservationData(Long userId, Long seatId) {
         return reservationRepository.getReservationData(userId, seatId);
+    }
+
+    @Override
+    public List<Reservation> getReservationDataByUserId(Long userId) {
+        return reservationRepository.getReservationData(userId);
+    }
+
+    @Override
+    public List<Reservation> getReservationDataByStatus(String status) {
+        return reservationRepository.getReservationData(status);
+    }
+
+    @Override
+    public Reservation getReservationDataByReservationId(Long reservationId) {
+        return reservationRepository.getReservationDataByReservationId(reservationId);
     }
 
     @Override

@@ -4,9 +4,6 @@ import com.hhplus.concert_ticketing.business.entity.Token;
 
 public interface TokenService {
 
-    public Token saveToken(Token token);
-
-    public Token validateToken(Long userId);
-
-    public Token updateToken(Token token);
+    Token generateToken(Long userId);
+    Token generateToken(Long userId, String token);
 }

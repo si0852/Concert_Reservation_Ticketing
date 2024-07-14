@@ -1,0 +1,29 @@
+package com.hhplus.concert_ticketing.business.facade.impl;
+
+import com.hhplus.concert_ticketing.business.entity.Customer;
+import com.hhplus.concert_ticketing.business.facade.ChargeManagementFacade;
+import com.hhplus.concert_ticketing.business.service.CustomerService;
+
+public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
+
+    private final CustomerService customerService;
+
+    public ChargeManagementFacadeImpl(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    @Override
+    public Customer chargingPoint(Long userId, Double amount) {
+        if(amount < 1000) throw new RuntimeException("1000원 이상의 금액을 충전해주세요");
+        Customer currentCustomerData = customerService.getCustomerData(userId);
+        Double total = amount + currentCustomerData.getBalance();
+        currentCustomerData.setBalance(total);
+
+        return customerService.updateCharge(currentCustomerData);
+    }
+
+    @Override
+    public Customer getCustomerData(Long userId) {
+        return customerService.getCustomerData(userId);
+    }
+}
