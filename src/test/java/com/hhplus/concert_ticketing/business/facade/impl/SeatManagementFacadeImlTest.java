@@ -49,14 +49,14 @@ class SeatManagementFacadeImlTest {
     void checking_token_and_stats_is_Active() {
         //given
         Long userId = 1L;
-        Long tokenId = 1L;
+        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokend)).thenReturn(token);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            seatManagementFacadeIml.getSeatData(userId, tokenId);
+            seatManagementFacadeIml.getSeatData(userId, tokend);
         });
     }
 
@@ -65,16 +65,16 @@ class SeatManagementFacadeImlTest {
     void validate_check_ConcertOption_is_null() {
         //given
         Long concertOptionId = 1L;
-        Long tokenId = 1L;
+        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokend)).thenReturn(token);
         when(concertOptionService.getConcertOptionDataByLocalDate(concertOptionId)).thenReturn(null);
 
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            seatManagementFacadeIml.getSeatData(concertOptionId, tokenId);
+            seatManagementFacadeIml.getSeatData(concertOptionId, tokend);
         });
     }
 
@@ -83,12 +83,12 @@ class SeatManagementFacadeImlTest {
     void validate_check_Seat_is_null() {
         //given
         Long concertOptionId = 1L;
-        Long tokenId = 1L;
+        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
         Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
 
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokend)).thenReturn(token);
         when(concertOptionService.getConcertOptionDataByLocalDate(concertOptionId))
                 .thenReturn(new ConcertOption(1L, now, 10000.0));
         List<Seat> list = new ArrayList<>();
@@ -96,7 +96,7 @@ class SeatManagementFacadeImlTest {
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            seatManagementFacadeIml.getSeatData(concertOptionId, tokenId);
+            seatManagementFacadeIml.getSeatData(concertOptionId, tokend);
         });
     }
 
@@ -108,12 +108,12 @@ class SeatManagementFacadeImlTest {
         //given
         Long concertOptionId = 2L;
         Long concertId = 2L;
-        Long tokenId = 1L;
+        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
         Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
 
-        when(tokenQueueService.validateTokenByTokenId(tokenId)).thenReturn(token);
+        when(tokenQueueService.validateTokenByToken(tokend)).thenReturn(token);
         ConcertOption concertOption = new ConcertOption(concertId, now.plusHours(1), 10000.0);
         when(concertOptionService.getConcertOptionDataByLocalDate(concertOptionId))
                 .thenReturn(concertOption);
@@ -127,7 +127,7 @@ class SeatManagementFacadeImlTest {
                 thenReturn(seatData);
 
         // when && then
-        assertEquals(seatData.size(), seatManagementFacadeIml.getSeatData(concertOptionId, tokenId).size());
+        assertEquals(seatData.size(), seatManagementFacadeIml.getSeatData(concertOptionId, tokend).size());
     }
 
 }

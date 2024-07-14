@@ -3,7 +3,9 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 import com.hhplus.concert_ticketing.business.entity.Customer;
 import com.hhplus.concert_ticketing.business.facade.ChargeManagementFacade;
 import com.hhplus.concert_ticketing.business.service.CustomerService;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
 
     private final CustomerService customerService;

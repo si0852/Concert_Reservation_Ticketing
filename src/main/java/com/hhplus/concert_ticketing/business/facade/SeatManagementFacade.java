@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SeatManagementFacade {
 
-    List<Seat> getSeatData(Long concertOptionId, Long tokenId);
+    List<Seat> getSeatData(Long concertOptionId, String token);
 }

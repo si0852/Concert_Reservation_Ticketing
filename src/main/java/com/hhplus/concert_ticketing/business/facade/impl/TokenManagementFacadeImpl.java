@@ -17,7 +17,7 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
     private final TokenQueueService tokenQueueService;
-    private final Integer maxActiveTokens = 30;
+    private final Integer maxActiveTokens = 10;
 
     public TokenManagementFacadeImpl(TokenService tokenService, TokenQueueService tokenQueueService) {
         this.tokenService = tokenService;
