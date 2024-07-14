@@ -1,6 +1,7 @@
 package com.hhplus.concert_ticketing.business.facade.impl;
 
 
+import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.business.entity.Reservation;
 import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
@@ -38,7 +39,7 @@ class ReservationManagementFacadeImplIntegratedTest {
     private static final Logger log = LoggerFactory.getLogger(ReservationManagementFacadeImplIntegratedTest.class);
 
     @Autowired
-    ReservationManagementFacadeImpl reservationManagementFacade;
+    ReservationManagementFacade reservationManagementFacade;
 
     @Autowired
     TokenQueueService tokenQueueService;

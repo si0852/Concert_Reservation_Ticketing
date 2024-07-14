@@ -1,30 +1,20 @@
 package com.hhplus.concert_ticketing.business.facade.impl;
 
+import com.hhplus.concert_ticketing.application.facade.PaymentManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.business.entity.*;
-import com.hhplus.concert_ticketing.business.facade.PaymentManagementFacade;
-import com.hhplus.concert_ticketing.business.facade.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.business.service.*;
-import com.hhplus.concert_ticketing.business.service.impl.*;
 import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class PaymentManagementFacadeImplIntegratedTest {

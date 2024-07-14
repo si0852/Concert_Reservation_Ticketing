@@ -1,5 +1,6 @@
 package com.hhplus.concert_ticketing.business.facade.impl;
 
+import com.hhplus.concert_ticketing.application.facade.TokenManagementFacade;
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
 import com.hhplus.concert_ticketing.business.service.impl.TokenServiceImpl;
@@ -26,7 +27,7 @@ class TokenManagementFacadeImplIntegratedTest {
     private static final Logger log = LoggerFactory.getLogger(TokenManagementFacadeImplIntegratedTest.class);
 
     @Autowired
-    TokenManagementFacadeImpl tokenManagementFacade;
+    TokenManagementFacade tokenManagementFacade;
 
     @Autowired
     TokenServiceImpl tokenService;

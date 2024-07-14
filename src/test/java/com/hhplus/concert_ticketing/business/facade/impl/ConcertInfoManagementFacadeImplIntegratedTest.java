@@ -8,9 +8,6 @@ import com.hhplus.concert_ticketing.business.service.ConcertOptionService;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
-import com.hhplus.concert_ticketing.business.service.impl.ConcertOptionServiceImpl;
-import com.hhplus.concert_ticketing.business.service.impl.ConcertServiceImpl;
-import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
 import com.hhplus.concert_ticketing.infra.JpaConcertOptionRepository;
 import com.hhplus.concert_ticketing.infra.JpaConcertRepository;
 import com.hhplus.concert_ticketing.infra.JpaTokenRepository;
@@ -28,7 +25,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
