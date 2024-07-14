@@ -7,9 +7,9 @@ import lombok.Getter;
 public class SeatResponse {
     Long seatId;
     String seatNumber;
-    SeatStatus status;
+    String status;
 
-    public SeatResponse(Long seatId, String seatNumber, SeatStatus status) {
+    public SeatResponse(Long seatId, String seatNumber, String status) {
         this.seatId = seatId;
         this.seatNumber = seatNumber;
         this.status = status;

@@ -1,7 +1,7 @@
-package com.hhplus.concert_ticketing.business.facade.impl;
+package com.hhplus.concert_ticketing.application.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.*;
-import com.hhplus.concert_ticketing.business.facade.PaymentManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.PaymentManagementFacade;
 import com.hhplus.concert_ticketing.business.service.*;
 import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;

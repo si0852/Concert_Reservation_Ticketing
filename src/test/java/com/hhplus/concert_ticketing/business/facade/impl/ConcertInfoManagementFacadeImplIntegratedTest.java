@@ -2,9 +2,8 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Concert;
 import com.hhplus.concert_ticketing.business.entity.ConcertOption;
-import com.hhplus.concert_ticketing.business.entity.Customer;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.facade.ConcertInfoManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.ConcertInfoManagementFacade;
 import com.hhplus.concert_ticketing.business.service.ConcertOptionService;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.TokenQueueService;

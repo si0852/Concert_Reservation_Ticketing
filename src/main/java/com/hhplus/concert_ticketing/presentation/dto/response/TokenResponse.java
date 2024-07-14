@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 public class TokenResponse {
 
     String          token;
-    Long            queuePosition;
+    Integer         queuePosition;
     LocalDateTime   expired_at;
 
     @Builder
-    public TokenResponse(String token, Long queuePosition, LocalDateTime expired_at) {
+    public TokenResponse(String token, Integer queuePosition, LocalDateTime expired_at) {
         this.token = token;
         this.queuePosition = queuePosition;
         this.expired_at = expired_at;
