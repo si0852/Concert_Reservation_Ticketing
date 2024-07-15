@@ -8,5 +8,5 @@ public interface TokenManagementFacade {
 
     Integer getTokenPosition(String token);
 
-    Token getTokenInfo(String token);
+    Token getTokenInfo(String token) throws Exception;
 }

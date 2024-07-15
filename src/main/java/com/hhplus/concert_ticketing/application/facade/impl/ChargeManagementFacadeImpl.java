@@ -4,6 +4,7 @@ import com.hhplus.concert_ticketing.business.entity.Customer;
 import com.hhplus.concert_ticketing.application.facade.ChargeManagementFacade;
 import com.hhplus.concert_ticketing.business.service.CustomerService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
@@ -14,6 +15,7 @@ public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
         this.customerService = customerService;
     }
 
+    @Transactional
     @Override
     public Customer chargingPoint(Long userId, Double amount) {
         if(amount < 1000) throw new RuntimeException("1000원 이상의 금액을 충전해주세요");
@@ -24,6 +26,7 @@ public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
         return customerService.updateCharge(currentCustomerData);
     }
 
+    @Transactional
     @Override
     public Customer getCustomerData(Long userId) {
         return customerService.getCustomerData(userId);

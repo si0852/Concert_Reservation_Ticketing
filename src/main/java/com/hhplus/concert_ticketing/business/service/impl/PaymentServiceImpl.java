@@ -28,7 +28,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getPaymentData(Long reservationId) {
-        return paymentRepository.getPaymentData(reservationId);
+        List<Payment> paymentData = paymentRepository.getPaymentData(reservationId);
+        if(paymentData.size() == 0) throw new RuntimeException("결제정보가 없습니다.");
+        return paymentData;
     }
 
 }

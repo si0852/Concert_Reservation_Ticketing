@@ -1,15 +1,15 @@
 package com.hhplus.concert_ticketing.application.facade.impl;
 
+import com.hhplus.concert_ticketing.business.entity.ConcertOption;
 import com.hhplus.concert_ticketing.business.entity.Reservation;
 import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
+import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
-import com.hhplus.concert_ticketing.business.service.SeatService;
-import com.hhplus.concert_ticketing.business.service.TokenQueueService;
+import com.hhplus.concert_ticketing.business.service.TokenService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
-import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,23 +19,28 @@ import java.util.List;
 @Component
 public class ReservationManagementFacadeImpl implements ReservationManagementFacade {
 
-    private final TokenQueueService tokenQueueService;
+    private final TokenService tokenService;
     private final ReservationService reservationService;
-    private final SeatService seatService;
+    private final ConcertService concertService;
 
-    public ReservationManagementFacadeImpl(TokenQueueService tokenQueueService, ReservationService reservationService, SeatService seatService) {
-        this.tokenQueueService = tokenQueueService;
+    public ReservationManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, ConcertService concertService) {
+        this.tokenService = tokenService;
         this.reservationService = reservationService;
-        this.seatService = seatService;
+        this.concertService = concertService;
     }
 
     @Transactional
     @Override
-    public Reservation reservationProgress(String tokenData, Long seatId) {
+    public Reservation reservationProgress(String tokenData, Long seatId) throws Exception {
         // 토큰 확인
-        Token token = tokenQueueService.validateTokenByToken(tokenData);
-        // 토큰 상태가 ACTIVE이면 RuntimeException
-        if(token != null && !token.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("토큰 정보가 유효하지 않습니다.");
+        Token token = tokenService.validateTokenByToken(tokenData);
+        // 좌석정보 확인
+        Seat seatOnlyData = concertService.getSeatOnlyData(seatId);
+        // 좌석정보가 이미 예약이 되어 있으면 RuntimeException
+        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString())) throw new RuntimeException("예약된 좌석입니다.");
+
+        ConcertOption concertOptionData = concertService.getConcertOptionDataById(seatOnlyData.getConcertOptionId());
+        concertService.getConcertData(concertOptionData.getConcertId());
 
         // user 1명당 예약은 1명 제한을 두었다. 해당 케이스 validation check
         List<Reservation> reservationDataByUserId = reservationService.getReservationDataByUserId(token.getUserId());
@@ -45,7 +50,6 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
 
         // 예약 정보 확인
         Reservation reservationData = reservationService.getReservationData(token.getUserId(), seatId);
-
 
         if (reservationData != null) {
             String status = reservationData.getStatus();
@@ -63,16 +67,11 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         // 추가 또는 업데이트
         Reservation saveReservation = reservationService.SaveReservationData(reservationData);
 
-
-        // 좌석정보 확인
-        Seat seatOnlyData = seatService.getSeatOnlyData(seatId);
-        // 좌석정보가 이미 예약이 되어 있으면 RuntimeException
-        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString())) throw new RuntimeException("예약된 좌석입니다.");
         // 좌석정보가 예약이 아니면 예약상태로 변경
         seatOnlyData.setSeatStatus(SeatStatus.RESERVED.toString());
 
         // 좌석정보 업데이트
-        seatService.updateSeatData(seatOnlyData);
+        concertService.updateSeatData(seatOnlyData);
 
         return saveReservation;
     }

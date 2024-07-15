@@ -4,5 +4,5 @@ import com.hhplus.concert_ticketing.business.entity.Payment;
 
 public interface PaymentManagementFacade {
 
-    Payment paymentProgress(Long reservationId, String token);
+    Payment paymentProgress(Long reservationId, String token) throws Exception;
 }

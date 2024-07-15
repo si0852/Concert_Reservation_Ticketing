@@ -23,22 +23,31 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public Reservation getReservationData(Long userId, Long seatId) {
-        return reservationRepository.getReservationData(userId, seatId);
+        Reservation reservationData = reservationRepository.getReservationData(userId, seatId);
+        if(reservationData == null) throw new RuntimeException("예약정보가 없습니다.");
+        return reservationData;
     }
 
     @Override
     public List<Reservation> getReservationDataByUserId(Long userId) {
-        return reservationRepository.getReservationData(userId);
+        List<Reservation> reservationData = reservationRepository.getReservationData(userId);
+        if(reservationData.size() == 0) throw new RuntimeException("예약정보가 없습니다.");
+        return reservationData;
     }
 
     @Override
     public List<Reservation> getReservationDataByStatus(String status) {
-        return reservationRepository.getReservationData(status);
+        List<Reservation> reservationData = reservationRepository.getReservationData(status);
+        if(reservationData.size() == 0) throw new RuntimeException("예약정보가 없습니다.");
+        return reservationData;
     }
 
     @Override
     public Reservation getReservationDataByReservationId(Long reservationId) {
-        return reservationRepository.getReservationDataByReservationId(reservationId);
+        Reservation validationReservationInfo = reservationRepository.getReservationDataByReservationId(reservationId);
+        // 예약정보가 없다면
+        if(validationReservationInfo == null) throw new RuntimeException("예약정보가 없습니다.");
+        return validationReservationInfo;
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.hhplus.concert_ticketing.application.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.application.facade.TokenManagementFacade;
-import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Component;
@@ -16,25 +15,22 @@ import java.util.stream.IntStream;
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
-    private final TokenQueueService tokenQueueService;
     private final Integer maxActiveTokens = 10;
 
-    public TokenManagementFacadeImpl(TokenService tokenService, TokenQueueService tokenQueueService) {
+    public TokenManagementFacadeImpl(TokenService tokenService) {
         this.tokenService = tokenService;
-        this.tokenQueueService = tokenQueueService;
     }
-
 
     @Transactional
     @Override
     public Token insertToken(Long userId) {
         // 토큰 존재여부 확인
         // -> userId 조건으로 토큰 존재여부 확인
-        Token token = tokenQueueService.validateToken(userId);
+        Token token = tokenService.validateToken(userId);
         // -> status: ACTIVE 조건으로 토큰 존재여부 확인
-        List<Token> activeToken = tokenQueueService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
+        List<Token> activeToken = tokenService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
         // -> status: WAITING 조건으로 토큰 존재여부 확인
-        List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
+        List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
         Token generatedToken = null;
 
@@ -60,13 +56,13 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
         }
 
 
-        return tokenQueueService.saveToken(generatedToken);
+        return tokenService.saveToken(generatedToken);
     }
 
-
+    @Transactional
     @Override
     public Integer getTokenPosition(String token) {
-        List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
+        List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
         // index 찾기
         int index = IntStream.range(0, waitingToken.size())
@@ -78,11 +74,11 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
         return index+1;
     }
 
+    @Transactional
     @Override
-    public Token getTokenInfo(String token) {
-        Token tokenInfo = tokenQueueService.validateTokenByToken(token);
-        if(tokenInfo == null) throw new RuntimeException("토큰정보가 존재하지 않습니다.");
-        else if(tokenInfo.getStatus().equals(TokenStatus.EXPIRED.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
+    public Token getTokenInfo(String token)  throws Exception{
+        Token tokenInfo = tokenService.validateTokenByToken(token);
+        if(tokenInfo.getStatus().equals(TokenStatus.EXPIRED.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
         else if(tokenInfo.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
         // 토큰 정보 - 롱폴링
         return tokenInfo;

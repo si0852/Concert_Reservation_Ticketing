@@ -29,17 +29,15 @@ public class TicketingController {
     private final ConcertInfoManagementFacade concertInfoManagementFacade;
     private final PaymentManagementFacade paymentManagementFacade;
     private final ReservationManagementFacade reservationManagementFacade;
-    private final ScheduleManagementFacade scheduleManagementFacade;
-    private final SeatManagementFacade seatManagementFacade;
+    private final StatusManagementFacade statusManagementFacade;
     private final TokenManagementFacade tokenManagementFacade;
 
-    public TicketingController(ChargeManagementFacade chargeManagementFacade, ConcertInfoManagementFacade concertInfoManagementFacade, PaymentManagementFacade paymentManagementFacade, ReservationManagementFacade reservationManagementFacade, ScheduleManagementFacade scheduleManagementFacade, SeatManagementFacade seatManagementFacade, TokenManagementFacade tokenManagementFacade) {
+    public TicketingController(ChargeManagementFacade chargeManagementFacade, ConcertInfoManagementFacade concertInfoManagementFacade, PaymentManagementFacade paymentManagementFacade, ReservationManagementFacade reservationManagementFacade, StatusManagementFacade statusManagementFacade, TokenManagementFacade tokenManagementFacade) {
         this.chargeManagementFacade = chargeManagementFacade;
         this.concertInfoManagementFacade = concertInfoManagementFacade;
         this.paymentManagementFacade = paymentManagementFacade;
         this.reservationManagementFacade = reservationManagementFacade;
-        this.scheduleManagementFacade = scheduleManagementFacade;
-        this.seatManagementFacade = seatManagementFacade;
+        this.statusManagementFacade = statusManagementFacade;
         this.tokenManagementFacade = tokenManagementFacade;
     }
 
@@ -98,7 +96,7 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<Token> getTokenInfo(@RequestParam String token) {
+    public ResponseEntity<Token> getTokenInfo(@RequestParam String token) throws Exception {
         Token tokenInfo = tokenManagementFacade.getTokenInfo(token);
 
         return ResponseEntity.ok(tokenInfo);
@@ -123,7 +121,7 @@ public class TicketingController {
     public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
             @PathVariable Long concertId,
             @RequestParam String token
-    ) {
+    )  throws Exception{
 
         List<ConcertOption> concertOptions = concertInfoManagementFacade.getConcertOption(token, concertId);
         log.info("you entered concertOptionId :: " + concertId);
@@ -159,8 +157,8 @@ public class TicketingController {
     public ResponseEntity<List<SeatResponse>> getAvailableSeats(
             @RequestParam String token,
             @PathVariable Long concertOptionId
-    ) {
-        List<Seat> seatData = seatManagementFacade.getSeatData(concertOptionId, token);
+    ) throws Exception {
+        List<Seat> seatData = concertInfoManagementFacade.getSeatData(concertOptionId, token);
         List<SeatResponse> seatResponses = new ArrayList<>();
 
         for (Seat seat : seatData) {
@@ -188,7 +186,7 @@ public class TicketingController {
             @Parameter(name = "seatId", description = "seatId 값", example = "1")
     })
     public ResponseEntity<ReservationResponse> reserveSeat(
-            @RequestBody ReservationRequest request) {
+            @RequestBody ReservationRequest request)  throws Exception{
         Reservation reservation = reservationManagementFacade.reservationProgress(request.getToken(), request.getSeatId());
         ReservationResponse response = ReservationResponse.builder()
                 .reservationId(reservation.getReservationId())
@@ -252,7 +250,7 @@ public class TicketingController {
             @Parameter(name = "token", description = "token", example = "asdfasdfa123")
     })
     public ResponseEntity<PaymentResponse> processPayment(
-            @RequestBody PaymentRequest request) {
+            @RequestBody PaymentRequest request) throws Exception {
         Payment payment = paymentManagementFacade.paymentProgress(request.getReservationId(), request.getToken());
         return ResponseEntity.ok(PaymentResponse.builder()
                 .paymentId(payment.getPaymentId())

@@ -21,7 +21,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer getCustomerData(Long customerId) {
-        return customerRepository.getCustomerData(customerId);
+        Customer customerData = customerRepository.getCustomerData(customerId);
+        if(customerData == null) throw new RuntimeException("유저가 존재하지 않습니다.");
+        return customerData;
     }
 
     @Override

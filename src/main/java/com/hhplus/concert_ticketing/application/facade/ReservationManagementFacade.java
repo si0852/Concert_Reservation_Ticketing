@@ -4,5 +4,5 @@ import com.hhplus.concert_ticketing.business.entity.Reservation;
 
 public interface ReservationManagementFacade {
 
-    Reservation reservationProgress(String tokenData, Long seatId);
+    Reservation reservationProgress(String tokenData, Long seatId) throws Exception;
 }
