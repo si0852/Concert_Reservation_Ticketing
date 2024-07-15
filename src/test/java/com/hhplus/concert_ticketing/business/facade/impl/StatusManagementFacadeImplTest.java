@@ -17,12 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-class ScheduleManagementFacadeImplTest {
+class StatusManagementFacadeImplTest {
 
 
-    private static final Logger log = LoggerFactory.getLogger(ScheduleManagementFacadeImplTest.class);
+    private static final Logger log = LoggerFactory.getLogger(StatusManagementFacadeImplTest.class);
 
     @DisplayName("토큰 만료: Active 상태인 토큰 데이터를 여러개 주어졌을때 5분이 넘었을 경우 상태값이 Active로 변경되는지 테스트")
     @Test
