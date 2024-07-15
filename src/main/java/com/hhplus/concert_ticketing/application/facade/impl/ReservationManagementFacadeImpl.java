@@ -8,8 +8,11 @@ import com.hhplus.concert_ticketing.application.facade.ReservationManagementFaca
 import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
+import com.hhplus.concert_ticketing.util.exception.ExistDataInfoException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +40,8 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         // 좌석정보 확인
         Seat seatOnlyData = concertService.getSeatOnlyData(seatId);
         // 좌석정보가 이미 예약이 되어 있으면 RuntimeException
-        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString())) throw new RuntimeException("예약된 좌석입니다.");
+        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString()))
+            throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약된 좌석입니다.", SeatStatus.RESERVED.toString()));
 
         ConcertOption concertOptionData = concertService.getConcertOptionDataById(seatOnlyData.getConcertOptionId());
         concertService.getConcertData(concertOptionData.getConcertId());
@@ -46,7 +50,7 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         List<Reservation> reservationDataByUserId = reservationService.getReservationDataByUserId(token.getUserId());
         List<Reservation> filterOutCancel = reservationDataByUserId.stream().filter(data -> data.getStatus().equals(ReservationStatus.CANCELLED.toString())).toList();
 
-        if(filterOutCancel.size() > 0) throw new RuntimeException("이미 예약된 데이터가 존재합니다.");
+        if(filterOutCancel.size() > 0) throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "이미 예약된 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
 
         // 예약 정보 확인
         Reservation reservationData = reservationService.getReservationData(token.getUserId(), seatId);
@@ -54,7 +58,7 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         if (reservationData != null) {
             String status = reservationData.getStatus();
             // 예약 정보 상태가 취소가 아니면(예약중이거나 결제 이면) RuntimeException
-            if (status.equals(ReservationStatus.PAID.toString()) || status.equals(ReservationStatus.WAITING.toString()))throw new RuntimeException("예약중인 정보입니다.");
+            if (status.equals(ReservationStatus.PAID.toString()) || status.equals(ReservationStatus.WAITING.toString()))throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "이미 예약중인 정보입니다.", SeatStatus.RESERVED.toString()));
             // 예약 정보 상태가 취소이면 상태값 변경
             else if(reservationData.getStatus().equals(ReservationStatus.CANCELLED.toString())){
                 reservationData.setStatus(ReservationStatus.WAITING.toString());

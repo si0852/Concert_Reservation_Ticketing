@@ -3,7 +3,10 @@ package com.hhplus.concert_ticketing.business.service.impl;
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.business.repository.TokenRepository;
 import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -46,21 +49,21 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Token validateToken(Long userId) {
         Token token = tokenRepository.getToken(userId);
-        if(token == null) throw new RuntimeException("토큰 정보가 없습니다.");
+        if(token == null) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
         return token;
     }
 
     @Override
     public Token validateTokenByTokenId(Long tokenId) {
         Token token = tokenRepository.getTokenByTokenId(tokenId);
-        if(token == null) throw new RuntimeException("토큰 정보가 없습니다.");
+        if(token == null) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
         return token;
     }
 
     @Override
     public Token validateTokenByToken(String token) throws Exception{
         Token tokenByToken = tokenRepository.getTokenByToken(token);
-        if(tokenByToken == null) throw new RuntimeException("토큰 정보가 없습니다.");
+        if(tokenByToken == null) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
         if(tokenByToken != null && !tokenByToken.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("유효한 토큰이 아닙니다.");
         return tokenByToken;
     }
@@ -73,7 +76,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public List<Token> getTokenListByStatus(String status) {
         List<Token> tokenListByStatus = tokenRepository.getTokenListByStatus(status);
-        if(tokenListByStatus.size() == 0) throw new RuntimeException("토큰 정보가 없습니다.");
+        if(tokenListByStatus.size() == 0) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
         return tokenListByStatus;
     }
 }

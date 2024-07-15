@@ -1,4 +1,4 @@
-package com.hhplus.concert_ticketing.presentation.dto.response;
+package com.hhplus.concert_ticketing.status;
 
 public enum ReservationStatus {
     WAITING,

@@ -7,7 +7,7 @@ import com.hhplus.concert_ticketing.application.facade.StatusManagementFacade;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Component;

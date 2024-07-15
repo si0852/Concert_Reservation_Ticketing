@@ -3,9 +3,13 @@ package com.hhplus.concert_ticketing.application.facade.impl;
 import com.hhplus.concert_ticketing.business.entity.*;
 import com.hhplus.concert_ticketing.application.facade.PaymentManagementFacade;
 import com.hhplus.concert_ticketing.business.service.*;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import com.hhplus.concert_ticketing.util.exception.InSufficientBalanceException;
+import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +49,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         Token validateToken = tokenService.validateTokenByToken(token);
 
         // -> 토큰 만료
-        if (!reservationStatus.equals(ReservationStatus.WAITING.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
+        if (!reservationStatus.equals(ReservationStatus.WAITING.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰이 만료되었습니다.", null));
         // --> 예약 상태 만료
         if(reservationStatus.equals(ReservationStatus.WAITING.toString()) && seconds > 300L) {
             // ---> 예약 상태 취소로 변경
@@ -62,7 +66,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
             // ----> 토큰 상태 만료 처리
             tokenService.updateToken(validateToken);
             // -----> 예약 만료 에러 발생
-            throw new RuntimeException("예약 시간이 만료되었습니다.");
+            throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"예약 시간이 만료되었습니다.", null));
         }
 
         // -> 토큰 만료 X
@@ -77,7 +81,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         Double ticketPrice = concertOptionData.getPrice();
         // --> 잔액 부족할 경우
         if (ticketPrice > userPoint) {
-            throw new RuntimeException("잔액이 부족합니다.");
+            throw new InSufficientBalanceException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"잔액이 부족합니다.", userPoint));
         }
 
         // --> 잔액이 부족하지 않을 경우

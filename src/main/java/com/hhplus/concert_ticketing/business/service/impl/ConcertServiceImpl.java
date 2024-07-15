@@ -7,6 +7,9 @@ import com.hhplus.concert_ticketing.business.repository.ConcertOptionRepository;
 import com.hhplus.concert_ticketing.business.repository.ConcertRepository;
 import com.hhplus.concert_ticketing.business.repository.SeatRepository;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.util.exception.NoInfoException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,7 +36,7 @@ public class ConcertServiceImpl implements ConcertService {
     @Override
     public Concert getConcertData(Long concertId) {
         Concert concertData = concertRepository.getConcertData(concertId);
-        if (concertData == null) throw new RuntimeException("콘서트 정보가 없습니다.");
+        if (concertData == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 정보가 없습니다.", null));
         return concertData;
     }
 
@@ -50,28 +53,28 @@ public class ConcertServiceImpl implements ConcertService {
     @Override
     public List<ConcertOption> getConcertOptionData(Long concertId) {
         List<ConcertOption> concertOptionData = concertOptionRepository.getConcertOptionData(concertId);
-        if(concertOptionData.size() == 0) throw new RuntimeException("콘서트 상세 정보가 없습니다.");
+        if(concertOptionData.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 정보가 없습니다.", 0));
         return concertOptionData;
     }
 
     @Override
     public ConcertOption getConcertOptionDataByLocalDate(Long concertOptionId) {
         ConcertOption concertOptionDataByLocalDate = concertOptionRepository.getConcertOptionDataByLocalDate(concertOptionId);
-        if(concertOptionDataByLocalDate == null) throw new RuntimeException("오픈된 콘서트 정보가 없습니다.");
+        if(concertOptionDataByLocalDate == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "오픈된 콘서트 정보가 없습니다.", null));
         return concertOptionDataByLocalDate;
     }
 
     @Override
     public ConcertOption getConcertOptionDataById(Long concertOptionid) {
         ConcertOption concertOptionDataById = concertOptionRepository.getConcertOptionDataById(concertOptionid);
-        if(concertOptionDataById == null) throw new RuntimeException("콘서트 상세 정보가 없습니다.");
+        if(concertOptionDataById == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 상세 정보가 없습니다.", null));
         return concertOptionDataById;
     }
 
     @Override
     public List<LocalDateTime> getConcertDate(Long concertId) {
         List<LocalDateTime> concertDate = concertOptionRepository.getConcertDate(concertId);
-        if(concertDate.size() == 0) throw new RuntimeException("콘서트 상세 정보가 없습니다.");
+        if(concertDate.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 상세 정보가 없습니다.", 0));
         return concertDate;
     }
 
@@ -83,7 +86,7 @@ public class ConcertServiceImpl implements ConcertService {
     @Override
     public List<Seat> getSeatData(Long concertOptionId, String status) {
         List<Seat> seatData = seatRepository.getSeatData(concertOptionId, status);
-        if(seatData.size() == 0) throw new RuntimeException("예약가능한 좌석이 없습니다.");
+        if(seatData.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "예약가능한 좌석이 없습니다.", 0));
         return seatData;
     }
 
@@ -91,7 +94,7 @@ public class ConcertServiceImpl implements ConcertService {
     public Seat getSeatOnlyData(Long seatId) {
         Seat seatData = seatRepository.getSeatData(seatId);
         // 좌석정보가 없다면
-        if(seatData == null) throw new RuntimeException("좌석 정보가 없습니다.");
+        if(seatData == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "좌석 정보가 없습니다.", null));
         return seatData;
     }
 
