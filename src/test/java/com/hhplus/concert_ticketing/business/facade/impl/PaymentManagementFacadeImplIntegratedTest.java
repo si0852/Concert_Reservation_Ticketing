@@ -4,7 +4,7 @@ import com.hhplus.concert_ticketing.application.facade.PaymentManagementFacade;
 import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.business.entity.*;
 import com.hhplus.concert_ticketing.business.service.*;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;

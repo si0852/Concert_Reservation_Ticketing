@@ -20,9 +20,8 @@ public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
 
     @Transactional
     @Override
-    public Customer chargingPoint(Long userId, Double amount) {
-        if(amount < 1000)
-            throw new BadRequestException(new ResponseDto(HttpServletResponse.SC_BAD_REQUEST, "1000원 이상의 금액을 충전해주세요", amount));
+    public Customer chargingPoint(Long userId, Double amount) throws Exception{
+        if(amount < 1000) throw new BadRequestException(new ResponseDto(HttpServletResponse.SC_BAD_REQUEST, "1000원 이상의 금액을 충전해주세요", amount));
         Customer currentCustomerData = customerService.getCustomerData(userId);
         Double total = amount + currentCustomerData.getBalance();
         currentCustomerData.setBalance(total);
@@ -32,7 +31,7 @@ public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
 
     @Transactional
     @Override
-    public Customer getCustomerData(Long userId) {
+    public Customer getCustomerData(Long userId) throws Exception{
         return customerService.getCustomerData(userId);
     }
 }

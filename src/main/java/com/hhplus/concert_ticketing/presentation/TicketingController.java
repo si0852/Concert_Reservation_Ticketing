@@ -69,7 +69,7 @@ public class TicketingController {
 
     // 유저 토큰 순번 Return API
     // http://localhost:8080/api/token
-    @GetMapping("/api/token")
+    @GetMapping("/api/tokenNum")
     @Operation(summary = "유저 토큰 정보", description = "대기열의 토큰 순번 확인을 위한 토큰 정보 요청")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
@@ -79,12 +79,12 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<ResponseDto> getTokenWithPosition(@RequestParam String token) {
+    public ResponseEntity<ResponseDto> getTokenWithPosition(@RequestHeader("Authorization")String token) {
         Integer tokenPosition = tokenManagementFacade.getTokenPosition(token);
-        return ResponseEntity.ok(new ResponseDto(200, "Success", tokenPosition));
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", tokenPosition));
     }
 
-    // 유저 토큰 순번 Return API
+    // 유저 토큰 정보 Return API
     // http://localhost:8080/api/token
     @GetMapping("/api/tokenInfo")
     @Operation(summary = "유저 토큰 정보", description = "토큰 상태 확인을 위한 토큰 정보 요청")
@@ -97,10 +97,11 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<ResponseDto> getTokenInfo(@RequestParam String token) throws Exception {
+    public ResponseEntity<ResponseDto> getTokenInfo(@RequestHeader("Authorization")String token) throws Exception {
         Token tokenInfo = tokenManagementFacade.getTokenInfo(token);
-
-        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", tokenInfo));
+        Integer tokenPosition = tokenManagementFacade.getTokenPosition(token);
+        TokenResponse res = new TokenResponse(tokenInfo.getToken(), tokenPosition, tokenInfo.getExpiresAt());
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", res));
     }
 
 
@@ -120,8 +121,7 @@ public class TicketingController {
             @Parameter(name = "concertId", description = "concertId 값", example = "1")
     })
     public ResponseEntity<ResponseDto> getAvailableDates(
-            @PathVariable Long concertId,
-            @RequestParam String token
+            @PathVariable Long concertId, @RequestHeader("Authorization")String token
     )  throws Exception{
         List<ConcertOption> concertOptions = concertInfoManagementFacade.getConcertOption(token, concertId);
         List<ConcertDateResponse> responseData = new ArrayList<>();
@@ -154,8 +154,7 @@ public class TicketingController {
             @Parameter(name = "concertOptionId", description = "concertOptionId 값", example = "1")
     })
     public ResponseEntity<ResponseDto> getAvailableSeats(
-            @RequestParam String token,
-            @PathVariable Long concertOptionId
+            @PathVariable Long concertOptionId, @RequestHeader("Authorization")String token
     ) throws Exception {
         List<Seat> seatData = concertInfoManagementFacade.getSeatData(concertOptionId, token);
         List<SeatResponse> seatResponses = new ArrayList<>();
@@ -185,8 +184,8 @@ public class TicketingController {
             @Parameter(name = "seatId", description = "seatId 값", example = "1")
     })
     public ResponseEntity<ResponseDto> reserveSeat(
-            @RequestBody ReservationRequest request)  throws Exception{
-        Reservation reservation = reservationManagementFacade.reservationProgress(request.getToken(), request.getSeatId());
+            @RequestBody ReservationRequest request, @RequestHeader("Authorization")String token)  throws Exception{
+        Reservation reservation = reservationManagementFacade.reservationProgress(token, request.getSeatId());
         ReservationResponse response = ReservationResponse.builder()
                 .reservationId(reservation.getReservationId())
                 .build();
@@ -210,7 +209,7 @@ public class TicketingController {
             @Parameter(name = "userId", description = "userId", example = "1"),
             @Parameter(name = "amount", description = "충전할 금액", example = "1000")
     })
-    public ResponseEntity<ResponseDto> chargeBalance(@RequestBody BalanceRequest request) {
+    public ResponseEntity<ResponseDto> chargeBalance(@RequestBody BalanceRequest request) throws Exception{
         Customer customer = chargeManagementFacade.chargingPoint(request.getUserId(), request.getAmount());
         return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", BalanceResponse.builder()
                 .totalBalance(customer.getBalance())
@@ -228,7 +227,7 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "userId", description = "userId", example = "1"),
     })
-    public ResponseEntity<ResponseDto> getBalance(@RequestParam Long userId) {
+    public ResponseEntity<ResponseDto> getBalance(@RequestParam Long userId) throws Exception {
         Customer customerData = chargeManagementFacade.getCustomerData(userId);
         return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", BalanceResponse.builder()
                 .totalBalance(customerData.getBalance())
@@ -249,8 +248,8 @@ public class TicketingController {
             @Parameter(name = "token", description = "token", example = "asdfasdfa123")
     })
     public ResponseEntity<ResponseDto> processPayment(
-            @RequestBody PaymentRequest request) throws Exception {
-        Payment payment = paymentManagementFacade.paymentProgress(request.getReservationId(), request.getToken());
+            @RequestBody PaymentRequest request, @RequestHeader("Authorization")String token) throws Exception {
+        Payment payment = paymentManagementFacade.paymentProgress(request.getReservationId(), token);
         return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", PaymentResponse.builder()
                 .paymentId(payment.getPaymentId())
                 .build()));

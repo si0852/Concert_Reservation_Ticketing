@@ -63,8 +63,8 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Token validateTokenByToken(String token) throws Exception{
         Token tokenByToken = tokenRepository.getTokenByToken(token);
-        if(tokenByToken == null) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
-        if(tokenByToken != null && !tokenByToken.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("유효한 토큰이 아닙니다.");
+//        if(tokenByToken == null) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
+//        if(tokenByToken != null && !tokenByToken.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("유효한 토큰이 아닙니다.");
         return tokenByToken;
     }
 

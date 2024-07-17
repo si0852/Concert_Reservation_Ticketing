@@ -5,6 +5,8 @@ import com.hhplus.concert_ticketing.business.repository.ConcertRepository;
 import com.hhplus.concert_ticketing.infra.JpaConcertRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class ConcertRepositoryImpl implements ConcertRepository {
 
@@ -22,5 +24,10 @@ public class ConcertRepositoryImpl implements ConcertRepository {
     @Override
     public Concert getConcertData(Long concertId) {
         return jpaConcertRepository.findById(concertId).orElse(null);
+    }
+
+    @Override
+    public List<Concert> getConcertData() {
+        return jpaConcertRepository.findAll();
     }
 }

@@ -45,21 +45,6 @@ class ConcertInfoManagementFacadeImplTest {
     @Mock
     TokenRepositoryImpl tokenRepository;
 
-    @DisplayName("콘서트 유효성 체크, 토큰 유효성 체크")
-    @Test
-    void checking_concert_is_token_check() throws Exception{
-        //given
-        String token = "asdfasdfsa";
-        Long concertId = 1L;
-        LocalDateTime now = LocalDateTime.now();
-        when(tokenService.validateTokenByToken(token)).thenThrow(RuntimeException.class);
-
-        //when && then
-        assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token, concertId);
-        });
-    }
-
 
     @DisplayName("콘서트 유효성 체크, Concert가 null일 경우")
     @Test
@@ -68,8 +53,6 @@ class ConcertInfoManagementFacadeImplTest {
         String token = "asdfasdfsa";
         Long concertId = 1L;
         LocalDateTime now = LocalDateTime.now();
-        Token t = new Token(1L, token, TokenStatus.ACTIVE.toString(), now, now.plusHours(1));
-        when(tokenService.validateTokenByToken(token)).thenReturn(t);
         when(concertService.getConcertData(concertId)).thenThrow(RuntimeException.class);
 
         //when && then
@@ -85,9 +68,6 @@ class ConcertInfoManagementFacadeImplTest {
         //given
         String token = "asdfasdfsa";
         Long concertId = 1L;
-        LocalDateTime now = LocalDateTime.now();
-        Token t = new Token(1L, token, TokenStatus.ACTIVE.toString(), now, now.plusHours(1));
-        when(tokenService.validateTokenByToken(token)).thenReturn(t);
         Concert concert = new Concert("콘서트");
         when(concertService.getConcertData(concertId)).thenReturn(concert);
 
@@ -108,8 +88,6 @@ class ConcertInfoManagementFacadeImplTest {
         String token = "asdfasdfsa";
         Long concertId = 1L;
         LocalDateTime now = LocalDateTime.now();
-        Token t = new Token(1L, token, TokenStatus.ACTIVE.toString(), now, now.plusHours(1));
-        when(tokenService.validateTokenByToken(token)).thenReturn(t);
         Concert concert = new Concert("콘서트");
         when(concertService.getConcertData(concertId)).thenReturn(concert);
 
@@ -126,21 +104,6 @@ class ConcertInfoManagementFacadeImplTest {
         assertThat(concertOption).isEqualTo(concertOptionList);
     }
 
-    @DisplayName("토큰 유효성 체크, 토큰 상태가 ACTIVE일 경우")
-    @Test
-    void checking_token_and_stats_is_Active() throws Exception {
-        //given
-        Long userId = 1L;
-        String tokend = "adfasdf";
-        LocalDateTime now = LocalDateTime.now();
-        when(tokenService.validateTokenByToken(tokend)).thenThrow(RuntimeException.class);
-
-        // when && then
-        assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getSeatData(userId, tokend);
-        });
-    }
-
     @DisplayName("유효성 체크 ConcertOption이 Null일 경우")
     @Test
     void validate_check_ConcertOption_is_null() throws Exception {
@@ -148,7 +111,6 @@ class ConcertInfoManagementFacadeImplTest {
         Long concertOptionId = 1L;
         String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
-        Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
         when(concertService.getConcertOptionDataByLocalDate(concertOptionId)).thenThrow(RuntimeException.class);
 
 
@@ -166,9 +128,7 @@ class ConcertInfoManagementFacadeImplTest {
         String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
-        Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
 
-        when(tokenService.validateTokenByToken(tokend)).thenReturn(token);
         when(concertService.getConcertOptionDataByLocalDate(concertOptionId))
                 .thenReturn(new ConcertOption(1L, now, 10000.0));
         List<Seat> list = new ArrayList<>();
@@ -191,9 +151,7 @@ class ConcertInfoManagementFacadeImplTest {
         String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
-        Token token = new Token(1L, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
 
-        when(tokenService.validateTokenByToken(tokend)).thenReturn(token);
         ConcertOption concertOption = new ConcertOption(concertId, now.plusHours(1), 10000.0);
         when(concertService.getConcertOptionDataByLocalDate(concertOptionId))
                 .thenReturn(concertOption);

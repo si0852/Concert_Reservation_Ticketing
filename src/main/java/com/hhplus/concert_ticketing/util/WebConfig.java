@@ -16,6 +16,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(tokenAuthInterceptor)
                 .order(1)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/api/balance/**");
+                .excludePathPatterns("/api/balance/**", "/api/token");
     }
 }

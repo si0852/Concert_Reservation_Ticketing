@@ -58,6 +58,11 @@ public class ConcertServiceImpl implements ConcertService {
     }
 
     @Override
+    public List<Concert> getConcertData() {
+        return concertRepository.getConcertData();
+    }
+
+    @Override
     public ConcertOption getConcertOptionDataByLocalDate(Long concertOptionId) {
         ConcertOption concertOptionDataByLocalDate = concertOptionRepository.getConcertOptionDataByLocalDate(concertOptionId);
         if(concertOptionDataByLocalDate == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "오픈된 콘서트 정보가 없습니다.", null));

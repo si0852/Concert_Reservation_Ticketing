@@ -10,7 +10,7 @@ import com.hhplus.concert_ticketing.business.service.TokenService;
 import com.hhplus.concert_ticketing.infra.JpaReservationRepository;
 import com.hhplus.concert_ticketing.infra.JpaSeatRepository;
 import com.hhplus.concert_ticketing.infra.JpaTokenRepository;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.BeforeEach;

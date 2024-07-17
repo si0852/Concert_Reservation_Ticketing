@@ -29,7 +29,7 @@ public class ConcertInfoManagementFacadeImpl implements ConcertInfoManagementFac
     @Transactional
     @Override
     public List<ConcertOption> getConcertOption(String tokendata, Long concertId) throws Exception {
-        tokenService.validateTokenByToken(tokendata);
+//        tokenService.validateTokenByToken(tokendata);
 
         concertService.getConcertData(concertId);
 
@@ -42,11 +42,16 @@ public class ConcertInfoManagementFacadeImpl implements ConcertInfoManagementFac
     @Override
     public List<Seat> getSeatData(Long concertOptionId, String tokend)  throws Exception{
 
-        tokenService.validateTokenByToken(tokend);
+//        tokenService.validateTokenByToken(tokend);
         concertService.getConcertOptionDataByLocalDate(concertOptionId);
 
         String status = SeatStatus.AVAILABLE.toString();
         List<Seat> seatData = concertService.getSeatData(concertOptionId, status);
         return seatData;
+    }
+
+    @Override
+    public List<Concert> getConcertData() throws Exception {
+        return null;
     }
 }

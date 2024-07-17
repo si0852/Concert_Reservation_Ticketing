@@ -1,11 +1,11 @@
 package com.hhplus.concert_ticketing.presentation.dto.request;
 
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 public class PaymentRequest {
 
-    String token;
     Long reservationId;
 
 }
