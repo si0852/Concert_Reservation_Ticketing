@@ -56,20 +56,14 @@ public class TicketingController {
     })
     public ResponseEntity<ResponseDto> generateToken(@RequestParam Long userId) {
         Token token = tokenManagementFacade.insertToken(userId);
-        Integer tokenPosition = tokenManagementFacade.getTokenPosition(token.getToken());
 
-        TokenResponse response = TokenResponse.builder()
-                .token(token.getToken())
-                .queuePosition(tokenPosition)
-                .expired_at(token.getExpiresAt())
-                .build();
 
-        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", response));
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", token));
     }
 
     // 유저 토큰 순번 Return API
     // http://localhost:8080/api/token
-    @GetMapping("/api/tokenNum")
+    @GetMapping("/api/token/position")
     @Operation(summary = "유저 토큰 정보", description = "대기열의 토큰 순번 확인을 위한 토큰 정보 요청")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
@@ -86,7 +80,7 @@ public class TicketingController {
 
     // 유저 토큰 정보 Return API
     // http://localhost:8080/api/token
-    @GetMapping("/api/tokenInfo")
+    @GetMapping("/api/token/info")
     @Operation(summary = "유저 토큰 정보", description = "토큰 상태 확인을 위한 토큰 정보 요청")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
@@ -153,6 +147,7 @@ public class TicketingController {
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
             @Parameter(name = "concertOptionId", description = "concertOptionId 값", example = "1")
     })
+    @ResponseBody
     public ResponseEntity<ResponseDto> getAvailableSeats(
             @PathVariable Long concertOptionId, @RequestHeader("Authorization")String token
     ) throws Exception {
