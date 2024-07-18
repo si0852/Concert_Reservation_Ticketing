@@ -3,7 +3,9 @@ package com.hhplus.concert_ticketing.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +35,30 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("Authorization");
-        Token getToken = tokenService.validateTokenByToken(token);
-        if (getToken != null && getToken.getToken().equals(TokenStatus.ACTIVE.toString()) && getToken.getExpiresAt().isAfter(LocalDateTime.now())) {
-            log.error("Error : 토큰이 만료되었습니다.");
+        if (token == null || token.isBlank()) {
+            log.error("잘못된 요청입니다.");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return false;
+        }else {
+            try {
+                Token getToken = tokenService.validateTokenByToken(token);
+                if (getToken == null) {
+                    log.error("토큰 정보가 없습니다.");
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                } else {
+                    if (!getToken.getToken().equals(TokenStatus.ACTIVE.toString())) {
+                        log.error("접근할수 없는 토큰 입니다.");
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        return false;
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error : " + e.getMessage());
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return false;
+            }
         }
+
         return true;
     }
 
