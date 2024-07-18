@@ -1,5 +1,7 @@
 package com.hhplus.concert_ticketing.business.entity;
 
+import com.hhplus.concert_ticketing.status.ReservationStatus;
+import com.hhplus.concert_ticketing.status.SeatStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,8 +33,16 @@ public class Seat {
         this.seatStatus = status;
     }
 
-    public void setSeatStatus(String seatStatus) {
-        this.seatStatus = seatStatus;
+    public void changeStateReserve() {
+        this.seatStatus = SeatStatus.RESERVED.toString();
+    }
+
+    public void changeStatePaid() {
+        this.seatStatus = SeatStatus.PAID.toString();
+    }
+
+    public void changeStateUnlock() {
+        this.seatStatus = SeatStatus.AVAILABLE.toString();
     }
 
     public boolean isAvailableSeat() {
