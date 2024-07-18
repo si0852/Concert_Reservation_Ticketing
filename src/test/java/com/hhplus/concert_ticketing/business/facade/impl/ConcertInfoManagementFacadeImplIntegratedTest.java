@@ -67,7 +67,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         Token saveToken = tokenService.saveToken(tokenInfo);
 
         Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.WAITING.toString());
+        token.changeWaiting();
         tokenService.updateToken(token);
         Long concertId = 1L;
 
@@ -85,7 +85,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         Token saveToken = tokenService.saveToken(token1);
 
         Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.ACTIVE.toString());
+        token.changeActive();
         tokenService.updateToken(token);
         Long concertId = 1L;
 
@@ -102,7 +102,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         Token token1 = tokenService.generateToken(3L);
         Token saveToken = tokenService.saveToken(token1);
         Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.ACTIVE.toString());
+        token.changeActive();
         tokenService.updateToken(token);
 
         Concert concert = concertService.saveConcertData(new Concert("Party"));
@@ -122,7 +122,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         Token token1 = tokenService.generateToken(4L);
         Token saveToken = tokenService.saveToken(token1);
         Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.ACTIVE.toString());
+        token.changeActive();
         tokenService.updateToken(token);
 
         Concert concert = concertService.saveConcertData(new Concert("Party"));
@@ -146,7 +146,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         //given
         LocalDateTime now = LocalDateTime.now();
         Token token1 = tokenService.generateToken(1L);
-        token1.setStatus(TokenStatus.ACTIVE.toString());
+        token1.changeActive();
         Token token = tokenService.saveToken(token1);
         ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(11L, now.plusDays(1), 10000.0));
         log.info("concertOption : " + concertOption);

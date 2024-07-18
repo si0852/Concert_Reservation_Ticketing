@@ -48,7 +48,7 @@ class StatusManagementFacadeImplTest {
             LocalDateTime expiredAt = token.getExpiresAt();
             Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
             if (seconds > 300L){
-                token.setStatus(TokenStatus.EXPIRED.toString());
+                token.changeExpired();
                 log.info("tokenInfo : " + token);
                 tokenLisByExpired.add(token);
             }
@@ -98,12 +98,12 @@ class StatusManagementFacadeImplTest {
             LocalDateTime expiredAt = reservation.getUpdatedAt();
             Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
             if (seconds > 300L) {
-                reservation.setStatus(ReservationStatus.CANCELLED.toString());
+                reservation.changeStateCancel();
                 log.info("reservation : " +reservation);
                 reservationList.add(reservation);
                 Seat seatData = seats.get(Math.toIntExact(reservation.getSeatId())-1);
                 log.info("seatData : " +seatData);
-                seatData.setSeatStatus(SeatStatus.AVAILABLE.toString());
+                seatData.changeStateUnlock();
                 seatList.add(seatData);
             }
         }

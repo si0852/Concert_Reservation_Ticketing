@@ -49,7 +49,6 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Token validateToken(Long userId) {
         Token token = tokenRepository.getToken(userId);
-        if(token == null) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
         return token;
     }
 
@@ -76,7 +75,6 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public List<Token> getTokenListByStatus(String status) {
         List<Token> tokenListByStatus = tokenRepository.getTokenListByStatus(status);
-        if(tokenListByStatus.size() == 0) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
         return tokenListByStatus;
     }
 }

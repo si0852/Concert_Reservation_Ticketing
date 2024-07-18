@@ -57,7 +57,7 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
         // 대기열에 자리가 남아있다면
         if (activeSpace>0 && spaceQueue>0) {
-            generatedToken.setStatus(TokenStatus.ACTIVE.toString());
+            generatedToken.changeActive();
         }
 
 
@@ -67,16 +67,22 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
     @Transactional
     @Override
     public Integer getTokenPosition(String token) {
-        List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
+        try {
+            List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
-        // index 찾기
-        int index = IntStream.range(0, waitingToken.size())
-                .filter(data -> Objects.equals(waitingToken.get(data).getToken(), token))
-                .findFirst().orElse(-1);
+            // index 찾기
+            int index = IntStream.range(0, waitingToken.size())
+                    .filter(data -> Objects.equals(waitingToken.get(data).getToken(), token))
+                    .findFirst().orElse(-1);
 
-        if(waitingToken.get(index).getStatus().equals(TokenStatus.ACTIVE.toString())) throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
-        else if(waitingToken.get(index).getStatus().equals(TokenStatus.EXPIRED.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰이 만료되었습니다.", null));
-        return index+1;
+            if (waitingToken.get(index).getStatus().equals(TokenStatus.ACTIVE.toString()))
+                throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
+            else if (waitingToken.get(index).getStatus().equals(TokenStatus.EXPIRED.toString()))
+                throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "토큰이 만료되었습니다.", null));
+            return index + 1;
+        } catch (Exception e) {
+            throw new RuntimeException("Server Error : " + e.getMessage());
+        }
     }
 
     @Transactional

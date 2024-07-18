@@ -41,7 +41,7 @@ public class StatusManagementFacadeImpl implements StatusManagementFacade {
                 LocalDateTime expiredAt = token.getExpiresAt();
                 Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
                 if (seconds > 300L){
-                    token.setStatus(TokenStatus.EXPIRED.toString());
+                    token.changeExpired();
                     tokenService.updateToken(token);
                 }
             }
@@ -63,10 +63,10 @@ public class StatusManagementFacadeImpl implements StatusManagementFacade {
                 LocalDateTime expiredAt = reservation.getUpdatedAt();
                 Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
                 if (seconds > 300L) {
-                    reservation.setStatus(ReservationStatus.CANCELLED.toString());
+                    reservation.changeStateCancel();
                     reservationService.UpdateReservationData(reservation);
                     Seat seatData = concertService.getSeatOnlyData(reservation.getSeatId());
-                    seatData.setSeatStatus(SeatStatus.AVAILABLE.toString());
+                    seatData.changeStateUnlock();
                     concertService.updateSeatData(seatData);
                 }
 

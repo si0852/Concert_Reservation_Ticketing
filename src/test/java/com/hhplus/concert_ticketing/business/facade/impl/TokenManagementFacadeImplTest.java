@@ -53,7 +53,7 @@ class TokenManagementFacadeImplTest {
         int spaceQueue = activeSpace - 2;
 
         if (activeSpace > 0 && spaceQueue > 0) {
-            generateToken.setStatus(TokenStatus.ACTIVE.toString());
+            generateToken.changeActive();
         }
 
         //then
@@ -73,7 +73,7 @@ class TokenManagementFacadeImplTest {
         int spaceQueue = activeSpace - 5;
 
         if (activeSpace > 0 && spaceQueue > 0) {
-            generateToken.setStatus(TokenStatus.ACTIVE.toString());
+            generateToken.changeActive();
         }
 
         //then

@@ -43,18 +43,18 @@ class TokenManagementFacadeImplIntegratedTest {
         tokenService.saveToken(token2);
 
         Token token3 = tokenService.generateToken(3L);
-        token3.setStatus(TokenStatus.ACTIVE.toString());
+        token3.changeActive();
         tokenService.saveToken(token3);
 
         Token token4 = tokenService.generateToken(4L);
-        token4.setStatus(TokenStatus.ACTIVE.toString());
+        token4.changeActive();
         tokenService.saveToken(token4);
 
         Token token5 = tokenService.generateToken(5L);
         tokenService.saveToken(token5);
 
         Token token6 = tokenService.generateToken(6L);
-        token6.setStatus(TokenStatus.ACTIVE.toString());
+        token6.changeActive();
         tokenService.saveToken(token6);
 
         Token token7 = tokenService.generateToken(7L);
@@ -64,7 +64,7 @@ class TokenManagementFacadeImplIntegratedTest {
         tokenService.saveToken(token8);
 
         Token token9 = tokenService.generateToken(9L);
-        token9.setStatus(TokenStatus.EXPIRED.toString());
+        token9.changeExpired();
         tokenService.saveToken(token9);
 
     }
@@ -95,10 +95,11 @@ class TokenManagementFacadeImplIntegratedTest {
         set_up();
         Long userId = 12L;
         Token token9 = tokenService.generateToken(10L);
-        token9.setStatus(TokenStatus.ACTIVE.toString());
+        token9.changeActive();
         tokenService.saveToken(token9);
         Token token10 = tokenService.generateToken(11L);
         tokenService.saveToken(token10);
+
 
         //when
         Token token = tokenManagementFacade.insertToken(userId);

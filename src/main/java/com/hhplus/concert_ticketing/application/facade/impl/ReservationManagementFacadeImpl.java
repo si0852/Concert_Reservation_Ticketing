@@ -40,8 +40,8 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         // 좌석정보 확인
         Seat seatOnlyData = concertService.getSeatOnlyData(seatId);
         // 좌석정보가 이미 예약이 되어 있으면 RuntimeException
-        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString()))
-            throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약된 좌석입니다.", SeatStatus.RESERVED.toString()));
+        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString())) {
+            throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약된 좌석입니다.", SeatStatus.RESERVED.toString()));}
 
         ConcertOption concertOptionData = concertService.getConcertOptionDataById(seatOnlyData.getConcertOptionId());
         concertService.getConcertData(concertOptionData.getConcertId());
@@ -58,10 +58,10 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         if (reservationData != null) {
             String status = reservationData.getStatus();
             // 예약 정보 상태가 취소가 아니면(예약중이거나 결제 이면) RuntimeException
-            if (status.equals(ReservationStatus.PAID.toString()) || status.equals(ReservationStatus.WAITING.toString()))throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "이미 예약중인 정보입니다.", SeatStatus.RESERVED.toString()));
+            if (status.equals(ReservationStatus.PAID.toString()))throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "이미 예약중인 정보입니다.", SeatStatus.RESERVED.toString()));
             // 예약 정보 상태가 취소이면 상태값 변경
             else if(reservationData.getStatus().equals(ReservationStatus.CANCELLED.toString())){
-                reservationData.setStatus(ReservationStatus.WAITING.toString());
+                reservationData.changeStateReservation();
             }
         }
         if (reservationData == null) {
@@ -72,7 +72,7 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         Reservation saveReservation = reservationService.SaveReservationData(reservationData);
 
         // 좌석정보가 예약이 아니면 예약상태로 변경
-        seatOnlyData.setSeatStatus(SeatStatus.RESERVED.toString());
+        seatOnlyData.changeStateReserve();
 
         // 좌석정보 업데이트
         concertService.updateSeatData(seatOnlyData);

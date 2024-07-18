@@ -7,6 +7,7 @@ import com.hhplus.concert_ticketing.business.service.*;
 import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +46,18 @@ class PaymentManagementFacadeImplIntegratedTest {
     @Test
     void payment_process_test()  throws Exception{
         //given
+        LocalDateTime now = LocalDateTime.now();
         Customer customer = customerService.saveCustomer(new Customer("sihyun", 100000.0));
 
         Token token1 = tokenService.generateToken(customer.getCustomerId());
-        token1.setStatus(TokenStatus.ACTIVE.toString());
+        token1.changeActive();
         Token token = tokenService.saveToken(token1);
 
-        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(1L, LocalDateTime.now(), 10000.0));
+        Concert concert = concertService.saveConcertData(new Concert("Concert"));
+        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), LocalDateTime.now(), 10000.0));
 
         Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        reservationService.SaveReservationData(new Reservation(customer.getCustomerId(), seat.getSeatId(), "" , now, now.plusMinutes(1)));
         Reservation reservation = reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
 
         // when
@@ -78,20 +82,22 @@ class PaymentManagementFacadeImplIntegratedTest {
         Customer customer = customerService.saveCustomer(new Customer("sihyun", 100000.0));
 
         Token token1 = tokenService.generateToken(customer.getCustomerId());
-        token1.setStatus(TokenStatus.ACTIVE.toString());
+        token1.changeActive();
         Token token = tokenService.saveToken(token1);
         LocalDateTime now = LocalDateTime.now();
 
-        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(1L, now, 10000.0));
+        Concert concert = concertService.saveConcertData(new Concert("Concert"));
+        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), now, 10000.0));
 
         Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        reservationService.SaveReservationData(new Reservation(customer.getCustomerId(), seat.getSeatId(), ReservationStatus.WAITING.toString() , now, now.plusMinutes(6)));
         Reservation reservation = reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
         reservation.setCreatedAt(now);
         reservation.setUpdatedAt(now.plusMinutes(10));
         reservationService.UpdateReservationData(reservation);
 
         // when && then
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidTokenException.class, () -> {
             paymentManagementFacade.paymentProgress(reservation.getReservationId(), token.getToken());
         });
     }

@@ -27,14 +27,12 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation getReservationData(Long userId, Long seatId) {
         Reservation reservationData = reservationRepository.getReservationData(userId, seatId);
-        if(reservationData == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "예약정보가 없습니다.", null));
         return reservationData;
     }
 
     @Override
     public List<Reservation> getReservationDataByUserId(Long userId) {
         List<Reservation> reservationData = reservationRepository.getReservationData(userId);
-        if(reservationData.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "예약정보가 없습니다.", null));
         return reservationData;
     }
 

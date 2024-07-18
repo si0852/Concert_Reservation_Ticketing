@@ -48,16 +48,16 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
 
         Token validateToken = tokenService.validateTokenByToken(token);
 
-        // -> 토큰 만료
-        if (!reservationStatus.equals(ReservationStatus.WAITING.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰이 만료되었습니다.", null));
+        // -> 토큰 만료 (예약 시간 만료)
+        if (reservationStatus.equals(ReservationStatus.PAID.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"이미 예약된 정보입니다.", null));
         // --> 예약 상태 만료
         if(reservationStatus.equals(ReservationStatus.WAITING.toString()) && seconds > 300L) {
             // ---> 예약 상태 취소로 변경
-            validationReservationInfo.setStatus(ReservationStatus.CANCELLED.toString());
+            validationReservationInfo.changeStateCancel();
             // ---> 토큰 상태 만료로 변경
-            validateToken.setStatus(TokenStatus.EXPIRED.toString());
+            validateToken.changeExpired();
             // ---> 좌석 상태 열림으로 변경
-            seatData.setSeatStatus(SeatStatus.AVAILABLE.toString());
+            seatData.changeStateUnlock();
 
             // ----> 예약 상태 취소 처리
             reservationService.UpdateReservationData(validationReservationInfo);
@@ -77,21 +77,21 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         Customer customerData = customerService.getCustomerData(validateToken.getUserId());
 
         // --> 잔액 유효성 검증
-        Double userPoint = customerData.getBalance();
+//        Double userPoint = customerData.getBalance();
         Double ticketPrice = concertOptionData.getPrice();
         // --> 잔액 부족할 경우
-        if (ticketPrice > userPoint) {
-            throw new InSufficientBalanceException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"잔액이 부족합니다.", userPoint));
-        }
+//        if (ticketPrice > userPoint) {
+//            throw new InSufficientBalanceException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"잔액이 부족합니다.", userPoint));
+//        }
 
         // --> 잔액이 부족하지 않을 경우
-        Double totalPoint = userPoint - ticketPrice;
+//        Double totalPoint = userPoint - ticketPrice;
         // ---> 잔액 차감 처리
-        customerData.setBalance(totalPoint);
+        customerData.subtractBalance(ticketPrice);
         customerService.updateCharge(customerData);
 
         // ---> 좌석예약 확정 처리
-        seatData.setSeatStatus(SeatStatus.PAID.toString());
+        seatData.changeStatePaid();
         concertService.updateSeatData(seatData);
 
         // ---> 결재
@@ -99,11 +99,11 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         Payment paymentResult = paymentService.savePayment(payment);
 
         // ---> 예약
-        validationReservationInfo.setStatus(ReservationStatus.PAID.toString());
+        validationReservationInfo.changeStatePaid();
         reservationService.UpdateReservationData(validationReservationInfo);
 
         // ---> 토큰 만료
-        validateToken.setStatus(TokenStatus.EXPIRED.toString());
+        validateToken.changeExpired();
         tokenService.updateToken(validateToken);
 
         return paymentResult;

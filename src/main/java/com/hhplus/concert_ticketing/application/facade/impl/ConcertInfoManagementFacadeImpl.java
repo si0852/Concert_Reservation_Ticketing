@@ -52,6 +52,6 @@ public class ConcertInfoManagementFacadeImpl implements ConcertInfoManagementFac
 
     @Override
     public List<Concert> getConcertData() throws Exception {
-        return null;
+        return concertService.getConcertData();
     }
 }

@@ -65,52 +65,52 @@ class StatusManagementFacadeImplIntegratedTest {
     void expired_token() {
         // given
         Token token = tokenService.generateToken(1l);
-        token.setStatus(TokenStatus.ACTIVE.toString());
+        token.changeActive();
         token.setExpiresAt(token.getCreatedAt().plusMinutes(3));
         tokenService.saveToken(token);
 
         Token token2 = tokenService.generateToken(2l);
-        token2.setStatus(TokenStatus.ACTIVE.toString());
+        token2.changeActive();
         token2.setExpiresAt(token2.getCreatedAt().plusMinutes(2));
         tokenService.saveToken(token2);
 
         Token token3 = tokenService.generateToken(3l);
-        token3.setStatus(TokenStatus.ACTIVE.toString());
+        token3.changeActive();
         token3.setExpiresAt(token3.getCreatedAt().plusMinutes(1));
         tokenService.saveToken(token3);
 
         Token token4 = tokenService.generateToken(4l);
-        token4.setStatus(TokenStatus.ACTIVE.toString());
+        token4.changeActive();
         token4.setExpiresAt(token4.getCreatedAt().plusSeconds(299));
         tokenService.saveToken(token4);
 
         Token token5 = tokenService.generateToken(5l);
-        token5.setStatus(TokenStatus.ACTIVE.toString());
+        token5.changeActive();
         token5.setExpiresAt(token5.getCreatedAt().plusSeconds(200));
         tokenService.saveToken(token5);
 
         Token token6 = tokenService.generateToken(6l);
-        token6.setStatus(TokenStatus.ACTIVE.toString());
+        token6.changeActive();
         token6.setExpiresAt(token6.getCreatedAt().plusSeconds(301));
         tokenService.saveToken(token6);
 
         Token token7 = tokenService.generateToken(7l);
-        token7.setStatus(TokenStatus.ACTIVE.toString());
+        token7.changeActive();
         token7.setExpiresAt(token7.getCreatedAt().plusMinutes(6));
         tokenService.saveToken(token7);
 
         Token token8 = tokenService.generateToken(8l);
-        token8.setStatus(TokenStatus.ACTIVE.toString());
+        token8.changeActive();
         token8.setExpiresAt(token8.getCreatedAt().plusSeconds(310));
         tokenService.saveToken(token8);
 
         Token token9 = tokenService.generateToken(9l);
-        token9.setStatus(TokenStatus.ACTIVE.toString());
+        token9.changeActive();
         token9.setExpiresAt(token9.getCreatedAt().plusMinutes(9));
         tokenService.saveToken(token9);
 
         Token token10 = tokenService.generateToken(10l);
-        token10.setStatus(TokenStatus.ACTIVE.toString());
+        token10.changeActive();
         token10.setExpiresAt(token10.getCreatedAt().plusMinutes(13));
         tokenService.saveToken(token10);
 
