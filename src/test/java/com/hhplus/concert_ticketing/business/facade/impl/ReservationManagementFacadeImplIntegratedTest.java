@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,6 +66,52 @@ class ReservationManagementFacadeImplIntegratedTest {
         //then
         Reservation reservationDataByReservationId = reservationService.getReservationDataByReservationId(reservation.getReservationId());
         assertThat(reservationDataByReservationId.getReservationId()).isEqualTo(reservation.getReservationId());
+
+    }
+
+    @DisplayName("예약 진행 - 동시성테스트")
+    @Test
+    void reservation_progress_test() throws Exception {
+
+        //given
+        LocalDateTime now = LocalDateTime.now();
+        Customer customer = customerService.saveCustomer(new Customer("sihyun", 100000.0));
+        Token token1 = tokenService.generateToken(1L);
+        token1.changeActive();
+        Token token = tokenService.saveToken(token1);
+
+        Concert concert = concertService.saveConcertData(new Concert("Concert"));
+        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), LocalDateTime.now(), 10000.0));
+        Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        Reservation saveReservation = reservationService.SaveReservationData(new Reservation(customer.getCustomerId(), seat.getSeatId(), "", now, now.plusMinutes(1)));
+
+        //when
+        int numberOfThreads = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+        Runnable task = () -> {
+            try {
+              reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
+                Seat seatOnlyData = concertService.getSeatOnlyData(seat.getSeatId());
+                log.info("seatOnlyData : " +seatOnlyData.getSeatStatus());
+            } catch (Exception e) {
+                log.error("Exception in task", e);
+            } finally {
+                latch.countDown();
+            }
+        };
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            executorService.submit(task);
+        }
+
+        latch.await(); // await() 메서드를 사용하여 모든 스레드가 작업을 마칠 때까지 대기
+        executorService.shutdown(); // 스레드 종료
+
+        //then
+        Reservation reservationDataByReservationId = reservationService.getReservationDataByReservationId(saveReservation.getReservationId());
+        assertThat(reservationDataByReservationId.getReservationId()).isEqualTo(saveReservation.getReservationId());
 
     }
 

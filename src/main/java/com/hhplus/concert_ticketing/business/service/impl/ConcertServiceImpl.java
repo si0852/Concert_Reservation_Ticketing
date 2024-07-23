@@ -11,6 +11,7 @@ import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.util.exception.NoInfoException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -95,6 +96,7 @@ public class ConcertServiceImpl implements ConcertService {
         return seatData;
     }
 
+    @Transactional
     @Override
     public Seat getSeatOnlyData(Long seatId) {
         Seat seatData = seatRepository.getSeatData(seatId);

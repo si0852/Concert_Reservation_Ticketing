@@ -3,6 +3,8 @@ package com.hhplus.concert_ticketing.business.repository.impl;
 import com.hhplus.concert_ticketing.business.entity.Customer;
 import com.hhplus.concert_ticketing.business.repository.CustomerRepository;
 import com.hhplus.concert_ticketing.infra.JpaCustomerRepository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,6 +23,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public Customer getCustomerData(Long customerId) {
+//        return jpaCustomerRepository.findByCustomerIdForUpdate(customerId).orElse(null);
         return jpaCustomerRepository.findById(customerId).orElse(null);
     }
 

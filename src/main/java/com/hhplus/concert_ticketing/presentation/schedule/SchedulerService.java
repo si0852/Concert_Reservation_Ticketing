@@ -13,8 +13,14 @@ public class SchedulerService {
         this.statusManagementFacade = statusManagementFacade;
     }
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 60*1000)
     public void expiredToken() {
         statusManagementFacade.expiredToken();
+    }
+
+
+    @Scheduled(fixedDelay = 60*3*1000)
+    public void expiredReservation() {
+        statusManagementFacade.expiredReservationStatus();
     }
 }

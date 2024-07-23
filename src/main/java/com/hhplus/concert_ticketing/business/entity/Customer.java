@@ -3,10 +3,7 @@ package com.hhplus.concert_ticketing.business.entity;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.util.exception.BadRequestException;
 import com.hhplus.concert_ticketing.util.exception.InSufficientBalanceException;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,6 +19,9 @@ public class Customer {
 
     String userName;
     Double balance;
+
+    @Version
+    private Long version;
 
     public Customer(String userName, Double balance) {
         this.userName = userName;
@@ -40,7 +40,7 @@ public class Customer {
 
     public void chargePoint(Double point) {
         if(point < 1000) throw new BadRequestException(new ResponseDto(HttpServletResponse.SC_BAD_REQUEST, "1000원 이상의 금액을 충전해주세요", point));
-        Double total = getBalance() + point;
+        Double total = this.getBalance() + point;
         setBalance(total);
     }
 }
