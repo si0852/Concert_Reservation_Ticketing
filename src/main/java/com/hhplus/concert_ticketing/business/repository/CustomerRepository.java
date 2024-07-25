@@ -9,4 +9,6 @@ public interface CustomerRepository {
     Customer getCustomerData(Long customerId);
 
     Customer updateCharge(Customer customer);
+
+    void deleteAll();
 }
