@@ -21,7 +21,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 
     @Override
     public Customer getCustomerData(Long customerId) {
-        return jpaCustomerRepository.findById(customerId).orElse(null);
+        return jpaCustomerRepository.findByCustomerIdForUpdate(customerId).orElse(null);
     }
 
     @Override
