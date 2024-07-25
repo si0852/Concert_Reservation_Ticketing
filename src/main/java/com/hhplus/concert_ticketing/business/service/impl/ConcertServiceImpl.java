@@ -8,9 +8,12 @@ import com.hhplus.concert_ticketing.business.repository.ConcertRepository;
 import com.hhplus.concert_ticketing.business.repository.SeatRepository;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.util.exception.LockException;
 import com.hhplus.concert_ticketing.util.exception.NoInfoException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -83,6 +86,7 @@ public class ConcertServiceImpl implements ConcertService {
         return concertDate;
     }
 
+    @Transactional
     @Override
     public Seat saveSeatData(Seat seat) {
         return seatRepository.saveData(seat);
@@ -95,12 +99,17 @@ public class ConcertServiceImpl implements ConcertService {
         return seatData;
     }
 
+    @Transactional
     @Override
     public Seat getSeatOnlyData(Long seatId) {
-        Seat seatData = seatRepository.getSeatData(seatId);
-        // 좌석정보가 없다면
-        if(seatData == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "좌석 정보가 없습니다.", null));
-        return seatData;
+        try {
+            Seat seatData = seatRepository.getSeatData(seatId);
+            // 좌석정보가 없다면
+            if (seatData == null)throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "좌석 정보가 없습니다.", null));
+            return seatData;
+        } catch (OptimisticLockException e) {
+            throw new LockException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage(), null));
+        }
     }
 
     @Override
