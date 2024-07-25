@@ -14,9 +14,9 @@ import java.util.Optional;
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
     Optional<Reservation> findByUserIdAndSeatId(Long userId, Long seatId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select r from Reservation r where r.reservationId = :reservationId")
-    Optional<Reservation> findByReservationIdForUpdate(Long reservationId);
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @Query("select r from Reservation r where r.reservationId = :reservationId")
+//    Optional<Reservation> findByReservationIdForUpdate(Long reservationId);
     List<Reservation> findAllByUserId(Long userId);
     List<Reservation> findAllByStatus(String status);
 }

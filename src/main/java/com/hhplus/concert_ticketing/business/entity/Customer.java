@@ -20,8 +20,6 @@ public class Customer {
     String userName;
     Double balance;
 
-    @Version
-    private Long version;
 
     public Customer(String userName, Double balance) {
         this.userName = userName;

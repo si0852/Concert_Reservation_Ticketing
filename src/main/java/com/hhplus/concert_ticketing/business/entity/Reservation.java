@@ -1,10 +1,7 @@
 package com.hhplus.concert_ticketing.business.entity;
 
 import com.hhplus.concert_ticketing.status.ReservationStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -30,6 +27,9 @@ public class Reservation {
     String status; // 예약중, 결제됨, 예약취소
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+
+    @Version
+    Long version;
 
     public Reservation(Long userId, Long seatId, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.userId = userId;

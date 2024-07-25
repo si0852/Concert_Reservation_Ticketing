@@ -7,6 +7,7 @@ import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.util.exception.NoInfoException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationData;
     }
 
+    @Transactional
     @Override
     public Reservation getReservationDataByReservationId(Long reservationId) {
         Reservation validationReservationInfo = reservationRepository.getReservationDataByReservationId(reservationId);

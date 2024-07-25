@@ -10,6 +10,8 @@ import com.hhplus.concert_ticketing.status.TokenStatus;
 import com.hhplus.concert_ticketing.util.exception.InSufficientBalanceException;
 import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 @Component
 public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
 
+    private static final Logger log = LoggerFactory.getLogger(PaymentManagementFacadeImpl.class);
     private final TokenService tokenService;
     private final ReservationService reservationService;
     private final PaymentService paymentService;
@@ -47,7 +50,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         Seat seatData = concertService.getSeatOnlyData(validationReservationInfo.getSeatId());
 
         Token validateToken = tokenService.validateTokenByToken(token);
-
+        log.info("validateToken Status : " + validateToken.getStatus());
         // -> 토큰 만료 (예약 시간 만료)
         if (reservationStatus.equals(ReservationStatus.PAID.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"이미 예약된 정보입니다.", null));
         // --> 예약 상태 만료

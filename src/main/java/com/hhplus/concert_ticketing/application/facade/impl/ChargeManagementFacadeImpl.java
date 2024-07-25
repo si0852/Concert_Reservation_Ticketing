@@ -24,6 +24,7 @@ public class ChargeManagementFacadeImpl implements ChargeManagementFacade {
         return customerService.updateCharge(currentCustomerData);
     }
 
+    @Transactional
     @Override
     public Customer getCustomerData(Long userId) throws Exception{
         return customerService.getCustomerData(userId);
