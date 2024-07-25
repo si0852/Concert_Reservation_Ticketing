@@ -3,6 +3,9 @@ package com.hhplus.concert_ticketing.business.service.impl;
 import com.hhplus.concert_ticketing.business.entity.Reservation;
 import com.hhplus.concert_ticketing.business.repository.ReservationRepository;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.util.exception.NoInfoException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,22 +26,29 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public Reservation getReservationData(Long userId, Long seatId) {
-        return reservationRepository.getReservationData(userId, seatId);
+        Reservation reservationData = reservationRepository.getReservationData(userId, seatId);
+        return reservationData;
     }
 
     @Override
     public List<Reservation> getReservationDataByUserId(Long userId) {
-        return reservationRepository.getReservationData(userId);
+        List<Reservation> reservationData = reservationRepository.getReservationData(userId);
+        return reservationData;
     }
 
     @Override
     public List<Reservation> getReservationDataByStatus(String status) {
-        return reservationRepository.getReservationData(status);
+        List<Reservation> reservationData = reservationRepository.getReservationData(status);
+        if(reservationData.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "예약정보가 없습니다.", null));
+        return reservationData;
     }
 
     @Override
     public Reservation getReservationDataByReservationId(Long reservationId) {
-        return reservationRepository.getReservationDataByReservationId(reservationId);
+        Reservation validationReservationInfo = reservationRepository.getReservationDataByReservationId(reservationId);
+        // 예약정보가 없다면
+        if(validationReservationInfo == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "예약정보가 없습니다.", null));
+        return validationReservationInfo;
     }
 
     @Override

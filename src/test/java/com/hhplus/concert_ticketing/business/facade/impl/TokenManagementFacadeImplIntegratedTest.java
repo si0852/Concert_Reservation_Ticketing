@@ -2,13 +2,11 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.application.facade.TokenManagementFacade;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
-import com.hhplus.concert_ticketing.business.service.impl.TokenServiceImpl;
+import com.hhplus.concert_ticketing.business.service.TokenService;
 
 import com.hhplus.concert_ticketing.infra.JpaTokenRepository;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -30,10 +28,8 @@ class TokenManagementFacadeImplIntegratedTest {
     TokenManagementFacade tokenManagementFacade;
 
     @Autowired
-    TokenServiceImpl tokenService;
+    TokenService tokenService;
 
-    @Autowired
-    TokenQueueServiceImpl tokenQueueService;
 
     @Autowired
     JpaTokenRepository jpaTokenRepository;
@@ -41,35 +37,35 @@ class TokenManagementFacadeImplIntegratedTest {
 
     private void set_up() {
         Token token = tokenService.generateToken(1L);
-        tokenQueueService.saveToken(token);
+        tokenService.saveToken(token);
 
         Token token2 = tokenService.generateToken(2L);
-        tokenQueueService.saveToken(token2);
+        tokenService.saveToken(token2);
 
         Token token3 = tokenService.generateToken(3L);
-        token3.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.saveToken(token3);
+        token3.changeActive();
+        tokenService.saveToken(token3);
 
         Token token4 = tokenService.generateToken(4L);
-        token4.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.saveToken(token4);
+        token4.changeActive();
+        tokenService.saveToken(token4);
 
         Token token5 = tokenService.generateToken(5L);
-        tokenQueueService.saveToken(token5);
+        tokenService.saveToken(token5);
 
         Token token6 = tokenService.generateToken(6L);
-        token6.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.saveToken(token6);
+        token6.changeActive();
+        tokenService.saveToken(token6);
 
         Token token7 = tokenService.generateToken(7L);
-        tokenQueueService.saveToken(token7);
+        tokenService.saveToken(token7);
 
         Token token8 = tokenService.generateToken(8L);
-        tokenQueueService.saveToken(token8);
+        tokenService.saveToken(token8);
 
         Token token9 = tokenService.generateToken(9L);
-        token9.setStatus(TokenStatus.EXPIRED.toString());
-        tokenQueueService.saveToken(token9);
+        token9.changeExpired();
+        tokenService.saveToken(token9);
 
     }
 
@@ -99,10 +95,11 @@ class TokenManagementFacadeImplIntegratedTest {
         set_up();
         Long userId = 12L;
         Token token9 = tokenService.generateToken(10L);
-        token9.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.saveToken(token9);
+        token9.changeActive();
+        tokenService.saveToken(token9);
         Token token10 = tokenService.generateToken(11L);
-        tokenQueueService.saveToken(token10);
+        tokenService.saveToken(token10);
+
 
         //when
         Token token = tokenManagementFacade.insertToken(userId);
@@ -122,7 +119,7 @@ class TokenManagementFacadeImplIntegratedTest {
         Long userId = 9L;
 
         //when
-        Token getToken = tokenQueueService.validateToken(userId);
+        Token getToken = tokenService.validateToken(userId);
         Token token = tokenManagementFacade.insertToken(userId);
 
         //then
@@ -138,7 +135,7 @@ class TokenManagementFacadeImplIntegratedTest {
     void token_get_position() {
         //given
         set_up();
-        Token token = tokenQueueService.validateToken(8L);
+        Token token = tokenService.validateToken(8L);
         String tokend = token.getToken();
 
         //when
@@ -151,10 +148,10 @@ class TokenManagementFacadeImplIntegratedTest {
 
     @DisplayName("토큰 정보 리턴")
     @Test
-    void token_get_info() {
+    void token_get_info() throws Exception {
         //given
         set_up();
-        Token token = tokenQueueService.validateToken(8L);
+        Token token = tokenService.validateToken(8L);
         String tokend = token.getToken();
 
         //when

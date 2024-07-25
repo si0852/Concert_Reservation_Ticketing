@@ -3,6 +3,9 @@ package com.hhplus.concert_ticketing.business.service.impl;
 import com.hhplus.concert_ticketing.business.entity.Payment;
 import com.hhplus.concert_ticketing.business.repository.PaymentRepository;
 import com.hhplus.concert_ticketing.business.service.PaymentService;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.util.exception.NoInfoException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +31,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getPaymentData(Long reservationId) {
-        return paymentRepository.getPaymentData(reservationId);
+        List<Payment> paymentData = paymentRepository.getPaymentData(reservationId);
+        if(paymentData.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "결제정보가 없습니다.", null));
+        return paymentData;
     }
 
 }

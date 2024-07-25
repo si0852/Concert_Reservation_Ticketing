@@ -3,7 +3,7 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 import com.hhplus.concert_ticketing.application.facade.impl.PaymentManagementFacadeImpl;
 import com.hhplus.concert_ticketing.business.entity.*;
 import com.hhplus.concert_ticketing.business.service.impl.*;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -26,10 +26,8 @@ class PaymentManagementFacadeImplTest {
     PaymentManagementFacadeImpl paymentManagementFacade;
 
     @Mock
-    TokenQueueServiceImpl tokenQueueService;
+    TokenServiceImpl tokenService;
 
-    @Mock
-    SeatServiceImpl seatService;
 
     @Mock
     ReservationServiceImpl reservationService;
@@ -41,7 +39,7 @@ class PaymentManagementFacadeImplTest {
     CustomerServiceImpl customerService;
 
     @Mock
-    ConcertOptionServiceImpl concertOptionService;
+    ConcertServiceImpl concertService;
 
 
     @DisplayName("Error: 예약정보가 없습니다")
@@ -69,7 +67,7 @@ class PaymentManagementFacadeImplTest {
         LocalDateTime now = LocalDateTime.now();
         Reservation reservation = new Reservation(3L, 4L, ReservationStatus.WAITING.toString(), now, now.plusMinutes(5));
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(null);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(null);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -79,7 +77,7 @@ class PaymentManagementFacadeImplTest {
 
     @DisplayName("Error : 토큰 정보가 없습니다.")
     @Test
-    void throw_err_no_tokenInfo() {
+    void throw_err_no_tokenInfo()  throws Exception{
         //given
         Long reservationId = 2L;
         String token ="tldisle123";
@@ -90,9 +88,9 @@ class PaymentManagementFacadeImplTest {
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
 
         Seat seat = new Seat(concertOptionId, "1A", SeatStatus.AVAILABLE.toString());
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
 
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(null);
+        when(tokenService.validateTokenByToken(token)).thenReturn(null);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -102,7 +100,7 @@ class PaymentManagementFacadeImplTest {
 
     @DisplayName("Error : 토큰 정보가 만료 되었습니다.")
     @Test
-    void throw_err_expired_token() {
+    void throw_err_expired_token()  throws Exception{
         //given
         Long reservationId = 2L;
         String token ="tldisle123";
@@ -113,10 +111,10 @@ class PaymentManagementFacadeImplTest {
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
 
         Seat seat = new Seat(concertOptionId, "1A", SeatStatus.AVAILABLE.toString());
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
 
         Token tokenData = new Token(11L, token, TokenStatus.ACTIVE.toString(), now, now.plusMinutes(5));
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenData);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenData);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -144,7 +142,7 @@ class PaymentManagementFacadeImplTest {
 
     @DisplayName("Error : 예약 시간이 만료 되었습니다.")
     @Test
-    void throw_err_expired_time() {
+    void throw_err_expired_time()  throws Exception{
         //given
         Long reservationId = 2L;
         String token ="tldisle123";
@@ -155,10 +153,10 @@ class PaymentManagementFacadeImplTest {
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
 
         Seat seat = new Seat(concertOptionId, "1A", SeatStatus.AVAILABLE.toString());
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
 
         Token tokenData = new Token(11L, token, TokenStatus.ACTIVE.toString(), now, now.plusMinutes(5));
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenData);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenData);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -168,7 +166,7 @@ class PaymentManagementFacadeImplTest {
 
     @DisplayName("Error : 콘서트 옵션 데이터가 존재하지 않습니다.")
     @Test
-    void throw_err_no_concert_option_data() {
+    void throw_err_no_concert_option_data()  throws Exception{
         //given
         Long reservationId = 2L;
         String token ="tldisle123";
@@ -179,12 +177,12 @@ class PaymentManagementFacadeImplTest {
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
 
         Seat seat = new Seat(concertOptionId, "1A", SeatStatus.AVAILABLE.toString());
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
 
         Token tokenData = new Token(11L, token, TokenStatus.ACTIVE.toString(), now, now.plusMinutes(4));
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenData);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenData);
 
-        when(concertOptionService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(null);
+        when(concertService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(null);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -194,7 +192,7 @@ class PaymentManagementFacadeImplTest {
 
     @DisplayName("Error : 유저가 존재하지 않습니다.")
     @Test
-    void throw_err_no_user() {
+    void throw_err_no_user()  throws Exception{
         //given
         Long reservationId = 2L;
         String token ="tldisle123";
@@ -205,13 +203,13 @@ class PaymentManagementFacadeImplTest {
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
 
         Seat seat = new Seat(concertOptionId, "1A", SeatStatus.AVAILABLE.toString());
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
 
         Token tokenData = new Token(11L, token, TokenStatus.ACTIVE.toString(), now, now.plusMinutes(4));
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenData);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenData);
 
         ConcertOption concertOption = new ConcertOption(seat.getConcertOptionId(), LocalDateTime.now(), 10000.0);
-        when(concertOptionService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(concertOption);
+        when(concertService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(concertOption);
 
         when(customerService.getCustomerData(tokenData.getUserId())).thenReturn(null);
 
@@ -223,7 +221,7 @@ class PaymentManagementFacadeImplTest {
 
     @DisplayName("Error : 잔액이 부족합니다.")
     @Test
-    void throw_err_insufficient_money() {
+    void throw_err_insufficient_money()  throws Exception{
         //given
         Long reservationId = 2L;
         String token ="tldisle123";
@@ -234,13 +232,13 @@ class PaymentManagementFacadeImplTest {
         when(reservationService.getReservationDataByReservationId(reservationId)).thenReturn(reservation);
 
         Seat seat = new Seat(concertOptionId, "1A", SeatStatus.AVAILABLE.toString());
-        when(seatService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
+        when(concertService.getSeatOnlyData(reservation.getSeatId())).thenReturn(seat);
 
         Token tokenData = new Token(11L, token, TokenStatus.ACTIVE.toString(), now, now.plusMinutes(4));
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenData);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenData);
 
         ConcertOption concertOption = new ConcertOption(seat.getConcertOptionId(), LocalDateTime.now(), 10000.0);
-        when(concertOptionService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(concertOption);
+        when(concertService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(concertOption);
 
         Customer customer = new Customer("si", 9000.0);
         when(customerService.getCustomerData(tokenData.getUserId())).thenReturn(customer);

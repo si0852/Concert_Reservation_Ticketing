@@ -2,15 +2,15 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Concert;
 import com.hhplus.concert_ticketing.business.entity.ConcertOption;
+import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.application.facade.ConcertInfoManagementFacade;
-import com.hhplus.concert_ticketing.business.service.ConcertOptionService;
 import com.hhplus.concert_ticketing.business.service.ConcertService;
-import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
 import com.hhplus.concert_ticketing.infra.JpaConcertOptionRepository;
 import com.hhplus.concert_ticketing.infra.JpaConcertRepository;
 import com.hhplus.concert_ticketing.infra.JpaTokenRepository;
+import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
@@ -34,12 +35,6 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
 
     @Autowired
     ConcertInfoManagementFacade concertInfoManagementFacade;
-
-    @Autowired
-    ConcertOptionService concertOptionService;
-
-    @Autowired
-    TokenQueueService tokenQueueService;
 
     @Autowired
     TokenService tokenService;
@@ -69,11 +64,11 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     void test_token_status_is_active() {
         //given
         Token tokenInfo = tokenService.generateToken(1L);
-        Token saveToken = tokenQueueService.saveToken(tokenInfo);
+        Token saveToken = tokenService.saveToken(tokenInfo);
 
-        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.WAITING.toString());
-        tokenQueueService.updateToken(token);
+        Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
+        token.changeWaiting();
+        tokenService.updateToken(token);
         Long concertId = 1L;
 
         //when && then
@@ -87,11 +82,11 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     void test_no_concert_info() {
         //given
         Token token1 = tokenService.generateToken(2L);
-        Token saveToken = tokenQueueService.saveToken(token1);
+        Token saveToken = tokenService.saveToken(token1);
 
-        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.updateToken(token);
+        Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
+        token.changeActive();
+        tokenService.updateToken(token);
         Long concertId = 1L;
 
         //when && then
@@ -105,10 +100,10 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
     void test_no_concert_option_info() {
         //given
         Token token1 = tokenService.generateToken(3L);
-        Token saveToken = tokenQueueService.saveToken(token1);
-        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.updateToken(token);
+        Token saveToken = tokenService.saveToken(token1);
+        Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
+        token.changeActive();
+        tokenService.updateToken(token);
 
         Concert concert = concertService.saveConcertData(new Concert("Party"));
 
@@ -122,27 +117,48 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
 
     @DisplayName("logicTest: 동작여부")
     @Test
-    void logic_test() {
+    void logic_test()  throws Exception{
         //given
         Token token1 = tokenService.generateToken(4L);
-        Token saveToken = tokenQueueService.saveToken(token1);
-        Token token = tokenQueueService.validateTokenByTokenId(saveToken.getTokenId());
-        token.setStatus(TokenStatus.ACTIVE.toString());
-        tokenQueueService.updateToken(token);
+        Token saveToken = tokenService.saveToken(token1);
+        Token token = tokenService.validateTokenByTokenId(saveToken.getTokenId());
+        token.changeActive();
+        tokenService.updateToken(token);
 
         Concert concert = concertService.saveConcertData(new Concert("Party"));
 
         Long concertId = concert.getConcertId();
         LocalDateTime now = LocalDateTime.now();
 
-        concertOptionService.saveConcertOption(new ConcertOption(concertId, now.plusHours(1), 10000.0));
-        concertOptionService.saveConcertOption(new ConcertOption(concertId, now.plusHours(3), 10000.0));
-        concertOptionService.saveConcertOption(new ConcertOption(concertId, now.plusHours(5), 10000.0));
+        concertService.saveConcertOption(new ConcertOption(concertId, now.plusHours(1), 10000.0));
+        concertService.saveConcertOption(new ConcertOption(concertId, now.plusHours(3), 10000.0));
+        concertService.saveConcertOption(new ConcertOption(concertId, now.plusHours(5), 10000.0));
 
         //when
         List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(token.getToken(), concertId);
         // then
         assertThat(concertOption.size()).isEqualTo(3);
+    }
+
+    @DisplayName("Seat 정상 로직 테스트")
+    @Test
+    void logic_test_seat()  throws Exception{
+        //given
+        LocalDateTime now = LocalDateTime.now();
+        Token token1 = tokenService.generateToken(1L);
+        token1.changeActive();
+        Token token = tokenService.saveToken(token1);
+        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(11L, now.plusDays(1), 10000.0));
+        log.info("concertOption : " + concertOption);
+        ConcertOption selectData = concertService.getConcertOptionDataById(concertOption.getConcertOptionId());
+        log.info("selectData : " + selectData);
+        Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+
+        // when
+        List<Seat> seatData = concertInfoManagementFacade.getSeatData(concertOption.getConcertOptionId(), token.getToken());
+
+        //then
+        assertEquals(seatData.get(0).getSeatId(), seat.getSeatId());
     }
 
 

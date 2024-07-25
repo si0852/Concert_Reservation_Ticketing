@@ -4,8 +4,8 @@ import com.hhplus.concert_ticketing.business.entity.Customer;
 
 public interface ChargeManagementFacade {
 
-    Customer chargingPoint(Long userId, Double amount);
+    Customer chargingPoint(Long userId, Double amount) throws Exception;
 
-    Customer getCustomerData(Long userId);
+    Customer getCustomerData(Long userId)  throws Exception;
 
 }

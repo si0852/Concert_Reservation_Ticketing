@@ -4,9 +4,10 @@ import com.hhplus.concert_ticketing.application.facade.PaymentManagementFacade;
 import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.business.entity.*;
 import com.hhplus.concert_ticketing.business.service.*;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +27,7 @@ class PaymentManagementFacadeImplIntegratedTest {
     ReservationManagementFacade reservationManagementFacade;
 
     @Autowired
-    TokenQueueService tokenQueueService;
-
-    @Autowired
     TokenService tokenService;
-
-    @Autowired
-    SeatService seatService;
 
     @Autowired
     ReservationService reservationService;
@@ -44,29 +39,32 @@ class PaymentManagementFacadeImplIntegratedTest {
     CustomerService customerService;
 
     @Autowired
-    ConcertOptionService concertOptionService;
+    ConcertService concertService;
 
 
     @DisplayName("결체처리프로세스 통합테스트 - 시간 만료되지 않았을때")
     @Test
-    void payment_process_test() {
+    void payment_process_test()  throws Exception{
         //given
+        LocalDateTime now = LocalDateTime.now();
         Customer customer = customerService.saveCustomer(new Customer("sihyun", 100000.0));
 
         Token token1 = tokenService.generateToken(customer.getCustomerId());
-        token1.setStatus(TokenStatus.ACTIVE.toString());
-        Token token = tokenQueueService.saveToken(token1);
+        token1.changeActive();
+        Token token = tokenService.saveToken(token1);
 
-        ConcertOption concertOption = concertOptionService.saveConcertOption(new ConcertOption(1L, LocalDateTime.now(), 10000.0));
+        Concert concert = concertService.saveConcertData(new Concert("Concert"));
+        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), LocalDateTime.now(), 10000.0));
 
-        Seat seat = seatService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        reservationService.SaveReservationData(new Reservation(customer.getCustomerId(), seat.getSeatId(), "" , now, now.plusMinutes(1)));
         Reservation reservation = reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
 
         // when
         paymentManagementFacade.paymentProgress(reservation.getReservationId(), token.getToken());
-        Token getToken = tokenQueueService.validateTokenByToken(token.getToken());
+        Token getToken = tokenService.validateTokenByToken(token.getToken());
         Customer getCustomer = customerService.getCustomerData(customer.getCustomerId());
-        Seat getSeatData = seatService.getSeatOnlyData(seat.getSeatId());
+        Seat getSeatData = concertService.getSeatOnlyData(seat.getSeatId());
         Reservation getReservationData = reservationService.getReservationDataByReservationId(reservation.getReservationId());
 
         //then
@@ -79,25 +77,27 @@ class PaymentManagementFacadeImplIntegratedTest {
 
     @DisplayName("결체처리프로세스 통합테스트 - 예약 시간 만료되었을떄")
     @Test
-    void payment_process_test_expired_time() {
+    void payment_process_test_expired_time()  throws Exception{
         //given
         Customer customer = customerService.saveCustomer(new Customer("sihyun", 100000.0));
 
         Token token1 = tokenService.generateToken(customer.getCustomerId());
-        token1.setStatus(TokenStatus.ACTIVE.toString());
-        Token token = tokenQueueService.saveToken(token1);
+        token1.changeActive();
+        Token token = tokenService.saveToken(token1);
         LocalDateTime now = LocalDateTime.now();
 
-        ConcertOption concertOption = concertOptionService.saveConcertOption(new ConcertOption(1L, now, 10000.0));
+        Concert concert = concertService.saveConcertData(new Concert("Concert"));
+        ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), now, 10000.0));
 
-        Seat seat = seatService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
+        reservationService.SaveReservationData(new Reservation(customer.getCustomerId(), seat.getSeatId(), ReservationStatus.WAITING.toString() , now, now.plusMinutes(6)));
         Reservation reservation = reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
         reservation.setCreatedAt(now);
         reservation.setUpdatedAt(now.plusMinutes(10));
         reservationService.UpdateReservationData(reservation);
 
         // when && then
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidTokenException.class, () -> {
             paymentManagementFacade.paymentProgress(reservation.getReservationId(), token.getToken());
         });
     }

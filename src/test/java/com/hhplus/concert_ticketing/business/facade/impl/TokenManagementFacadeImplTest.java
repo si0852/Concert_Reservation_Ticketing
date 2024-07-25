@@ -2,7 +2,6 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 import com.hhplus.concert_ticketing.application.facade.impl.TokenManagementFacadeImpl;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.service.impl.TokenQueueServiceImpl;
 import com.hhplus.concert_ticketing.business.service.impl.TokenServiceImpl;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -35,8 +34,6 @@ class TokenManagementFacadeImplTest {
     @Mock
     TokenServiceImpl tokenService;
 
-    @Mock
-    TokenQueueServiceImpl tokenQueueService;
 
     private final Integer maxActiveTokens = 30;
     // userId 통해 조회된 token 정보 null 일때, generateToken = generateToken
@@ -56,7 +53,7 @@ class TokenManagementFacadeImplTest {
         int spaceQueue = activeSpace - 2;
 
         if (activeSpace > 0 && spaceQueue > 0) {
-            generateToken.setStatus(TokenStatus.ACTIVE.toString());
+            generateToken.changeActive();
         }
 
         //then
@@ -76,7 +73,7 @@ class TokenManagementFacadeImplTest {
         int spaceQueue = activeSpace - 5;
 
         if (activeSpace > 0 && spaceQueue > 0) {
-            generateToken.setStatus(TokenStatus.ACTIVE.toString());
+            generateToken.changeActive();
         }
 
         //then
@@ -90,7 +87,7 @@ class TokenManagementFacadeImplTest {
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateToken(userId)).thenReturn(token);
+        when(tokenService.validateToken(userId)).thenReturn(token);
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
@@ -105,13 +102,13 @@ class TokenManagementFacadeImplTest {
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.EXPIRED.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateToken(userId)).thenReturn(token);
+        when(tokenService.validateToken(userId)).thenReturn(token);
 
         //when
         LocalDateTime after = now.plusMinutes(30);
         Token updateToken = new Token(userId, "token123123", TokenStatus.WAITING.toString(), after, after.plusMinutes(10));
         when(tokenService.generateToken(userId, token.getToken())).thenReturn(updateToken);
-        when(tokenQueueService.saveToken(updateToken)).thenReturn(updateToken);
+        when(tokenService.saveToken(updateToken)).thenReturn(updateToken);
 
         //then
         assertThat(tokenManagementFacade.insertToken(userId)).isEqualTo(updateToken);
@@ -139,10 +136,10 @@ class TokenManagementFacadeImplTest {
 
     @DisplayName("폴링: 상태값 찾기 - 토큰 정보 null일떄")
     @Test
-    void polling_find_status_null() {
+    void polling_find_status_null()  throws Exception{
         //given
         String token = "token123123";
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(null);
+        when(tokenService.validateTokenByToken(token)).thenReturn(null);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -152,11 +149,11 @@ class TokenManagementFacadeImplTest {
 
     @DisplayName("폴링: 상태값 찾기 - 토큰 상태가 Expired 일때")
     @Test
-    void polling_find_status_expired() {
+    void polling_find_status_expired()  throws Exception{
         //given
         String token = "token123123";
         Token tokenInfo = new Token(1L, token, TokenStatus.EXPIRED.toString(), null, null);
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenInfo);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenInfo);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
@@ -166,11 +163,11 @@ class TokenManagementFacadeImplTest {
 
     @DisplayName("폴링: 상태값 찾기 - 토큰 상태가 Active 일때")
     @Test
-    void polling_find_status_active() {
+    void polling_find_status_active()  throws Exception{
         //given
         String token = "token123123";
         Token tokenInfo = new Token(1L, token, TokenStatus.ACTIVE.toString(), null, null);
-        when(tokenQueueService.validateTokenByToken(token)).thenReturn(tokenInfo);
+        when(tokenService.validateTokenByToken(token)).thenReturn(tokenInfo);
 
         // when && then
         assertThrows(RuntimeException.class, () -> {

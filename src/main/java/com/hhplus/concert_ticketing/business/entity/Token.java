@@ -1,5 +1,6 @@
 package com.hhplus.concert_ticketing.business.entity;
 
+import com.hhplus.concert_ticketing.status.TokenStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,8 +36,19 @@ public class Token {
         this.expiresAt = expiresAt;
     }
 
-    public void setStatus(String status) {
+    private void setStatus(String status) {
         this.status = status;
+    }
+
+    public void changeExpired() {
+        setStatus(TokenStatus.EXPIRED.toString());
+    }
+
+    public void changeWaiting() {
+        setStatus(TokenStatus.WAITING.toString());
+    }
+    public void changeActive() {
+        setStatus(TokenStatus.ACTIVE.toString());
     }
 
     public void setExpiresAt(LocalDateTime expiresAt) {

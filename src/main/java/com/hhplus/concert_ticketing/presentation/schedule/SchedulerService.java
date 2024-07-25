@@ -1,20 +1,20 @@
 package com.hhplus.concert_ticketing.presentation.schedule;
 
-import com.hhplus.concert_ticketing.application.facade.ScheduleManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.StatusManagementFacade;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SchedulerService {
 
-    private final ScheduleManagementFacade scheduleManagementFacade;
+    private final StatusManagementFacade statusManagementFacade;
 
-    public SchedulerService(ScheduleManagementFacade scheduleManagementFacade) {
-        this.scheduleManagementFacade = scheduleManagementFacade;
+    public SchedulerService(StatusManagementFacade statusManagementFacade) {
+        this.statusManagementFacade = statusManagementFacade;
     }
 
     @Scheduled(fixedDelay = 60000)
     public void expiredToken() {
-        scheduleManagementFacade.expiredToken();
+        statusManagementFacade.expiredToken();
     }
 }

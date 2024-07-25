@@ -3,7 +3,7 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 import com.hhplus.concert_ticketing.business.entity.Reservation;
 import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -17,12 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-class ScheduleManagementFacadeImplTest {
+class StatusManagementFacadeImplTest {
 
 
-    private static final Logger log = LoggerFactory.getLogger(ScheduleManagementFacadeImplTest.class);
+    private static final Logger log = LoggerFactory.getLogger(StatusManagementFacadeImplTest.class);
 
     @DisplayName("토큰 만료: Active 상태인 토큰 데이터를 여러개 주어졌을때 5분이 넘었을 경우 상태값이 Active로 변경되는지 테스트")
     @Test
@@ -49,7 +48,7 @@ class ScheduleManagementFacadeImplTest {
             LocalDateTime expiredAt = token.getExpiresAt();
             Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
             if (seconds > 300L){
-                token.setStatus(TokenStatus.EXPIRED.toString());
+                token.changeExpired();
                 log.info("tokenInfo : " + token);
                 tokenLisByExpired.add(token);
             }
@@ -99,12 +98,12 @@ class ScheduleManagementFacadeImplTest {
             LocalDateTime expiredAt = reservation.getUpdatedAt();
             Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
             if (seconds > 300L) {
-                reservation.setStatus(ReservationStatus.CANCELLED.toString());
+                reservation.changeStateCancel();
                 log.info("reservation : " +reservation);
                 reservationList.add(reservation);
                 Seat seatData = seats.get(Math.toIntExact(reservation.getSeatId())-1);
                 log.info("seatData : " +seatData);
-                seatData.setSeatStatus(SeatStatus.AVAILABLE.toString());
+                seatData.changeStateUnlock();
                 seatList.add(seatData);
             }
         }

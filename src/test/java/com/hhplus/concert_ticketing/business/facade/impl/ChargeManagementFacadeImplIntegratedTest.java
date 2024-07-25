@@ -38,10 +38,10 @@ class ChargeManagementFacadeImplIntegratedTest {
 
     @DisplayName("요청 금액 update")
     @Test
-    void update_check() {
+    void update_check() throws Exception {
         //given
         Double amount = 1900.0;
-        Customer customer2 = new Customer("sihyun2", 0.0);
+        Customer customer2 = new Customer("sihyun2",  0.0);
         Customer saveCustomer = customerService.saveCustomer(customer2);
 
         // when

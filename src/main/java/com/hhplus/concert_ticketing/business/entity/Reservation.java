@@ -1,5 +1,6 @@
 package com.hhplus.concert_ticketing.business.entity;
 
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,8 +39,16 @@ public class Reservation {
         this.updatedAt = updatedAt;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void changeStateCancel() {
+        this.status = ReservationStatus.CANCELLED.toString();
+    }
+
+    public void changeStateReservation() {
+        this.status = ReservationStatus.WAITING.toString();
+    }
+
+    public void changeStatePaid() {
+        this.status = ReservationStatus.PAID.toString();
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

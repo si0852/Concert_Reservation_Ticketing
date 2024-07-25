@@ -3,11 +3,11 @@ package com.hhplus.concert_ticketing.application.facade.impl;
 import com.hhplus.concert_ticketing.business.entity.Reservation;
 import com.hhplus.concert_ticketing.business.entity.Seat;
 import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.application.facade.ScheduleManagementFacade;
+import com.hhplus.concert_ticketing.application.facade.StatusManagementFacade;
+import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
-import com.hhplus.concert_ticketing.business.service.SeatService;
-import com.hhplus.concert_ticketing.business.service.TokenQueueService;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Component;
@@ -18,31 +18,31 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-public class ScheduleManagementFacadeImpl implements ScheduleManagementFacade {
+public class StatusManagementFacadeImpl implements StatusManagementFacade {
 
-    private final TokenQueueService tokenQueueService;
+    private final TokenService tokenService;
     private final ReservationService reservationService;
-    private final SeatService seatService;
+    private final ConcertService concertService;
 
-    public ScheduleManagementFacadeImpl(TokenQueueService tokenQueueService, ReservationService reservationService, SeatService seatService) {
-        this.tokenQueueService = tokenQueueService;
+    public StatusManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, ConcertService concertService) {
+        this.tokenService = tokenService;
         this.reservationService = reservationService;
-        this.seatService = seatService;
+        this.concertService = concertService;
     }
 
     @Transactional
     @Override
     public Boolean expiredToken() {
         try {
-            List<Token> tokenListByActive = tokenQueueService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
+            List<Token> tokenListByActive = tokenService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
 
             for (Token token: tokenListByActive) {
                 LocalDateTime createdAt = token.getCreatedAt();
                 LocalDateTime expiredAt = token.getExpiresAt();
                 Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
                 if (seconds > 300L){
-                    token.setStatus(TokenStatus.EXPIRED.toString());
-                    tokenQueueService.updateToken(token);
+                    token.changeExpired();
+                    tokenService.updateToken(token);
                 }
             }
             return true;
@@ -63,11 +63,11 @@ public class ScheduleManagementFacadeImpl implements ScheduleManagementFacade {
                 LocalDateTime expiredAt = reservation.getUpdatedAt();
                 Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
                 if (seconds > 300L) {
-                    reservation.setStatus(ReservationStatus.CANCELLED.toString());
+                    reservation.changeStateCancel();
                     reservationService.UpdateReservationData(reservation);
-                    Seat seatData = seatService.getSeatOnlyData(reservation.getSeatId());
-                    seatData.setSeatStatus(SeatStatus.AVAILABLE.toString());
-                    seatService.updateSeatData(seatData);
+                    Seat seatData = concertService.getSeatOnlyData(reservation.getSeatId());
+                    seatData.changeStateUnlock();
+                    concertService.updateSeatData(seatData);
                 }
 
             }

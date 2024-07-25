@@ -2,9 +2,13 @@ package com.hhplus.concert_ticketing.application.facade.impl;
 
 import com.hhplus.concert_ticketing.business.entity.Token;
 import com.hhplus.concert_ticketing.application.facade.TokenManagementFacade;
-import com.hhplus.concert_ticketing.business.service.TokenQueueService;
 import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
+import com.hhplus.concert_ticketing.util.exception.ExistDataInfoException;
+import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,25 +20,22 @@ import java.util.stream.IntStream;
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
-    private final TokenQueueService tokenQueueService;
     private final Integer maxActiveTokens = 10;
 
-    public TokenManagementFacadeImpl(TokenService tokenService, TokenQueueService tokenQueueService) {
+    public TokenManagementFacadeImpl(TokenService tokenService) {
         this.tokenService = tokenService;
-        this.tokenQueueService = tokenQueueService;
     }
-
 
     @Transactional
     @Override
     public Token insertToken(Long userId) {
         // 토큰 존재여부 확인
         // -> userId 조건으로 토큰 존재여부 확인
-        Token token = tokenQueueService.validateToken(userId);
+        Token token = tokenService.validateToken(userId);
         // -> status: ACTIVE 조건으로 토큰 존재여부 확인
-        List<Token> activeToken = tokenQueueService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
+        List<Token> activeToken = tokenService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
         // -> status: WAITING 조건으로 토큰 존재여부 확인
-        List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
+        List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
         Token generatedToken = null;
 
@@ -42,7 +43,7 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
         // -> userId로 조회된 토큰이 없을 경우
         if(token == null) generatedToken = tokenService.generateToken(userId);
         // -> userId로 조회된 토큰이 이미 존재 && ACTIVE 상태이면 예약중이므로 익셉션 발생
-        if(token != null && (token.getStatus().equals(TokenStatus.ACTIVE.toString()))) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
+        if(token != null && (token.getStatus().equals(TokenStatus.ACTIVE.toString()))) throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
 
         // -> userId로 조회된 토큰이 이미 존재 && EXPIRED 상태이면 발급날짜만 발급
         else if (token != null && token.getStatus().equals(TokenStatus.EXPIRED.toString())) generatedToken = tokenService.generateToken(userId, token.getToken());
@@ -56,34 +57,40 @@ public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
         // 대기열에 자리가 남아있다면
         if (activeSpace>0 && spaceQueue>0) {
-            generatedToken.setStatus(TokenStatus.ACTIVE.toString());
+            generatedToken.changeActive();
         }
 
 
-        return tokenQueueService.saveToken(generatedToken);
+        return tokenService.saveToken(generatedToken);
     }
 
-
+    @Transactional
     @Override
     public Integer getTokenPosition(String token) {
-        List<Token> waitingToken = tokenQueueService.getTokenListByStatus(TokenStatus.WAITING.toString());
+        try {
+            List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
 
-        // index 찾기
-        int index = IntStream.range(0, waitingToken.size())
-                .filter(data -> Objects.equals(waitingToken.get(data).getToken(), token))
-                .findFirst().orElse(-1);
+            // index 찾기
+            int index = IntStream.range(0, waitingToken.size())
+                    .filter(data -> Objects.equals(waitingToken.get(data).getToken(), token))
+                    .findFirst().orElse(-1);
 
-        if(waitingToken.get(index).getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
-        else if(waitingToken.get(index).getStatus().equals(TokenStatus.EXPIRED.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
-        return index+1;
+            if (waitingToken.get(index).getStatus().equals(TokenStatus.ACTIVE.toString()))
+                throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
+            else if (waitingToken.get(index).getStatus().equals(TokenStatus.EXPIRED.toString()))
+                throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "토큰이 만료되었습니다.", null));
+            return index + 1;
+        } catch (Exception e) {
+            throw new RuntimeException("Server Error : " + e.getMessage());
+        }
     }
 
+    @Transactional
     @Override
-    public Token getTokenInfo(String token) {
-        Token tokenInfo = tokenQueueService.validateTokenByToken(token);
-        if(tokenInfo == null) throw new RuntimeException("토큰정보가 존재하지 않습니다.");
-        else if(tokenInfo.getStatus().equals(TokenStatus.EXPIRED.toString())) throw new RuntimeException("토큰이 만료되었습니다.");
-        else if(tokenInfo.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new RuntimeException("예약 진행중인 데이터가 존재합니다.");
+    public Token getTokenInfo(String token)  throws Exception{
+        Token tokenInfo = tokenService.validateTokenByToken(token);
+        if(tokenInfo.getStatus().equals(TokenStatus.EXPIRED.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰이 만료되었습니다.", null));
+        else if(tokenInfo.getStatus().equals(TokenStatus.ACTIVE.toString())) throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
         // 토큰 정보 - 롱폴링
         return tokenInfo;
     }

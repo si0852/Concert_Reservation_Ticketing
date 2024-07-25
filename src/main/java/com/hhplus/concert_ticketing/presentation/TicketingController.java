@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,17 +30,15 @@ public class TicketingController {
     private final ConcertInfoManagementFacade concertInfoManagementFacade;
     private final PaymentManagementFacade paymentManagementFacade;
     private final ReservationManagementFacade reservationManagementFacade;
-    private final ScheduleManagementFacade scheduleManagementFacade;
-    private final SeatManagementFacade seatManagementFacade;
+    private final StatusManagementFacade statusManagementFacade;
     private final TokenManagementFacade tokenManagementFacade;
 
-    public TicketingController(ChargeManagementFacade chargeManagementFacade, ConcertInfoManagementFacade concertInfoManagementFacade, PaymentManagementFacade paymentManagementFacade, ReservationManagementFacade reservationManagementFacade, ScheduleManagementFacade scheduleManagementFacade, SeatManagementFacade seatManagementFacade, TokenManagementFacade tokenManagementFacade) {
+    public TicketingController(ChargeManagementFacade chargeManagementFacade, ConcertInfoManagementFacade concertInfoManagementFacade, PaymentManagementFacade paymentManagementFacade, ReservationManagementFacade reservationManagementFacade, StatusManagementFacade statusManagementFacade, TokenManagementFacade tokenManagementFacade) {
         this.chargeManagementFacade = chargeManagementFacade;
         this.concertInfoManagementFacade = concertInfoManagementFacade;
         this.paymentManagementFacade = paymentManagementFacade;
         this.reservationManagementFacade = reservationManagementFacade;
-        this.scheduleManagementFacade = scheduleManagementFacade;
-        this.seatManagementFacade = seatManagementFacade;
+        this.statusManagementFacade = statusManagementFacade;
         this.tokenManagementFacade = tokenManagementFacade;
     }
 
@@ -55,22 +54,16 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "userId", description = "유저 id", example = "1")
     })
-    public ResponseEntity<TokenResponse> generateToken(@RequestParam Long userId) {
+    public ResponseEntity<ResponseDto> generateToken(@RequestParam Long userId) {
         Token token = tokenManagementFacade.insertToken(userId);
-        Integer tokenPosition = tokenManagementFacade.getTokenPosition(token.getToken());
 
-        TokenResponse response = TokenResponse.builder()
-                .token(token.getToken())
-                .queuePosition(tokenPosition)
-                .expired_at(token.getExpiresAt())
-                .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", token));
     }
 
     // 유저 토큰 순번 Return API
     // http://localhost:8080/api/token
-    @GetMapping("/api/token")
+    @GetMapping("/api/token/position")
     @Operation(summary = "유저 토큰 정보", description = "대기열의 토큰 순번 확인을 위한 토큰 정보 요청")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
@@ -80,14 +73,14 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<Integer> getTokenWithPosition(@RequestParam String token) {
+    public ResponseEntity<ResponseDto> getTokenWithPosition(@RequestHeader("Authorization")String token) {
         Integer tokenPosition = tokenManagementFacade.getTokenPosition(token);
-        return ResponseEntity.ok(tokenPosition);
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", tokenPosition));
     }
 
-    // 유저 토큰 순번 Return API
+    // 유저 토큰 정보 Return API
     // http://localhost:8080/api/token
-    @GetMapping("/api/tokenInfo")
+    @GetMapping("/api/token/info")
     @Operation(summary = "유저 토큰 정보", description = "토큰 상태 확인을 위한 토큰 정보 요청")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 발급이 되었습니다.", content = @Content(mediaType = "application/json")),
@@ -98,10 +91,11 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl")
     })
-    public ResponseEntity<Token> getTokenInfo(@RequestParam String token) {
+    public ResponseEntity<ResponseDto> getTokenInfo(@RequestHeader("Authorization")String token) throws Exception {
         Token tokenInfo = tokenManagementFacade.getTokenInfo(token);
-
-        return ResponseEntity.ok(tokenInfo);
+        Integer tokenPosition = tokenManagementFacade.getTokenPosition(token);
+        TokenResponse res = new TokenResponse(tokenInfo.getToken(), tokenPosition, tokenInfo.getExpiresAt());
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", res));
     }
 
 
@@ -120,13 +114,10 @@ public class TicketingController {
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
             @Parameter(name = "concertId", description = "concertId 값", example = "1")
     })
-    public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
-            @PathVariable Long concertId,
-            @RequestParam String token
-    ) {
-
+    public ResponseEntity<ResponseDto> getAvailableDates(
+            @PathVariable Long concertId, @RequestHeader("Authorization")String token
+    )  throws Exception{
         List<ConcertOption> concertOptions = concertInfoManagementFacade.getConcertOption(token, concertId);
-        log.info("you entered concertOptionId :: " + concertId);
         List<ConcertDateResponse> responseData = new ArrayList<>();
 
         for(ConcertOption concertOption : concertOptions) {
@@ -139,7 +130,7 @@ public class TicketingController {
             responseData.add(dummyData);
         }
 
-        return ResponseEntity.ok(responseData);
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", responseData));
     }
 
 
@@ -156,17 +147,17 @@ public class TicketingController {
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
             @Parameter(name = "concertOptionId", description = "concertOptionId 값", example = "1")
     })
-    public ResponseEntity<List<SeatResponse>> getAvailableSeats(
-            @RequestParam String token,
-            @PathVariable Long concertOptionId
-    ) {
-        List<Seat> seatData = seatManagementFacade.getSeatData(concertOptionId, token);
+    @ResponseBody
+    public ResponseEntity<ResponseDto> getAvailableSeats(
+            @PathVariable Long concertOptionId, @RequestHeader("Authorization")String token
+    ) throws Exception {
+        List<Seat> seatData = concertInfoManagementFacade.getSeatData(concertOptionId, token);
         List<SeatResponse> seatResponses = new ArrayList<>();
 
         for (Seat seat : seatData) {
             seatResponses.add(new SeatResponse(seat.getSeatId(), seat.getSeatNumber(), seat.getSeatStatus()));
         }
-        return ResponseEntity.ok(seatResponses);
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", seatResponses));
     }
 
 
@@ -187,14 +178,14 @@ public class TicketingController {
             @Parameter(name = "token", description = "token 값", example = "asleisl293sl"),
             @Parameter(name = "seatId", description = "seatId 값", example = "1")
     })
-    public ResponseEntity<ReservationResponse> reserveSeat(
-            @RequestBody ReservationRequest request) {
-        Reservation reservation = reservationManagementFacade.reservationProgress(request.getToken(), request.getSeatId());
+    public ResponseEntity<ResponseDto> reserveSeat(
+            @RequestBody ReservationRequest request, @RequestHeader("Authorization")String token)  throws Exception{
+        Reservation reservation = reservationManagementFacade.reservationProgress(token, request.getSeatId());
         ReservationResponse response = ReservationResponse.builder()
                 .reservationId(reservation.getReservationId())
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", response));
     }
 
 
@@ -213,11 +204,11 @@ public class TicketingController {
             @Parameter(name = "userId", description = "userId", example = "1"),
             @Parameter(name = "amount", description = "충전할 금액", example = "1000")
     })
-    public ResponseEntity<BalanceResponse> chargeBalance(@RequestBody BalanceRequest request) {
+    public ResponseEntity<ResponseDto> chargeBalance(@RequestBody BalanceRequest request) throws Exception{
         Customer customer = chargeManagementFacade.chargingPoint(request.getUserId(), request.getAmount());
-        return ResponseEntity.ok(BalanceResponse.builder()
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", BalanceResponse.builder()
                 .totalBalance(customer.getBalance())
-                .build());
+                .build()));
     }
 
     // 잔액 조회
@@ -231,11 +222,11 @@ public class TicketingController {
     @Parameters({
             @Parameter(name = "userId", description = "userId", example = "1"),
     })
-    public ResponseEntity<BalanceResponse> getBalance(@RequestParam Long userId) {
+    public ResponseEntity<ResponseDto> getBalance(@RequestParam Long userId) throws Exception {
         Customer customerData = chargeManagementFacade.getCustomerData(userId);
-        return ResponseEntity.ok(BalanceResponse.builder()
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", BalanceResponse.builder()
                 .totalBalance(customerData.getBalance())
-                .build());
+                .build()));
     }
 
     // 결제 API
@@ -251,11 +242,11 @@ public class TicketingController {
             @Parameter(name = "reservationId", description = "reservationId", example = "1"),
             @Parameter(name = "token", description = "token", example = "asdfasdfa123")
     })
-    public ResponseEntity<PaymentResponse> processPayment(
-            @RequestBody PaymentRequest request) {
-        Payment payment = paymentManagementFacade.paymentProgress(request.getReservationId(), request.getToken());
-        return ResponseEntity.ok(PaymentResponse.builder()
+    public ResponseEntity<ResponseDto> processPayment(
+            @RequestBody PaymentRequest request, @RequestHeader("Authorization")String token) throws Exception {
+        Payment payment = paymentManagementFacade.paymentProgress(request.getReservationId(), token);
+        return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", PaymentResponse.builder()
                 .paymentId(payment.getPaymentId())
-                .build());
+                .build()));
     }
 }

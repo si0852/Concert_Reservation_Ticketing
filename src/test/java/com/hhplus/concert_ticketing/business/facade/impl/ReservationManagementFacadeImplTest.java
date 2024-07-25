@@ -2,13 +2,11 @@ package com.hhplus.concert_ticketing.business.facade.impl;
 
 
 import com.hhplus.concert_ticketing.application.facade.impl.ReservationManagementFacadeImpl;
-import com.hhplus.concert_ticketing.business.entity.Reservation;
-import com.hhplus.concert_ticketing.business.entity.Seat;
-import com.hhplus.concert_ticketing.business.entity.Token;
+import com.hhplus.concert_ticketing.business.entity.*;
+import com.hhplus.concert_ticketing.business.service.ConcertService;
 import com.hhplus.concert_ticketing.business.service.ReservationService;
-import com.hhplus.concert_ticketing.business.service.SeatService;
-import com.hhplus.concert_ticketing.business.service.TokenQueueService;
-import com.hhplus.concert_ticketing.presentation.dto.response.ReservationStatus;
+import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -36,25 +34,103 @@ class ReservationManagementFacadeImplTest {
     ReservationManagementFacadeImpl reservationManagementFacade;
 
     @Mock
-    TokenQueueService tokenQueueService;
+    TokenService tokenService;
 
     @Mock
     ReservationService reservationService;
 
     @Mock
-    SeatService seatService;
+    ConcertService concertService;
 
 
     @DisplayName("좌석예약 - 토큰 유효성 체크")
     @Test
-    void reservation_token_valid_check() {
+    void reservation_token_valid_check()  throws Exception{
+        //given
+        Long seatId = 1L;
+        String tokendata = "Adfasdfs11";
+        Long userId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        when(tokenService.validateTokenByToken(tokendata)).thenThrow(RuntimeException.class);
+
+        //when&&then
+        assertThrows(RuntimeException.class, () -> {
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
+        });
+    }
+
+    @DisplayName("좌석예약 - 좌석조회시 null 일때")
+    @Test
+    void reservation_seat_valid_check()  throws Exception{
         //given
         Long seatId = 1L;
         String tokendata = "Adfasdfs11";
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByToken(tokendata)).thenReturn(token);
+        when(tokenService.validateTokenByToken(tokendata)).thenReturn(token);
+        when(concertService.getSeatOnlyData(seatId)).thenThrow(RuntimeException.class);
+
+        //when&&then
+        assertThrows(RuntimeException.class, () -> {
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
+        });
+    }
+
+    @DisplayName("좌석예약 - 좌석조회시 상태가 예약상태 일때")
+    @Test
+    void reservation_seat_valid_check_reserved()  throws Exception{
+        //given
+        Long seatId = 1L;
+        String tokendata = "Adfasdfs11";
+        Long userId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token token = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
+        when(tokenService.validateTokenByToken(tokendata)).thenReturn(token);
+        Seat seat = new Seat(1L, "1A", SeatStatus.RESERVED.toString());
+        when(concertService.getSeatOnlyData(seatId)).thenReturn(seat);
+
+        //when&&then
+        assertThrows(RuntimeException.class, () -> {
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
+        });
+    }
+
+    @DisplayName("좌석예약 - concertOption 조회시 null 일때")
+    @Test
+    void reservation_concert_option_valid_check_reserved()  throws Exception{
+        //given
+        Long seatId = 1L;
+        String tokendata = "Adfasdfs11";
+        Long userId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token token = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
+        when(tokenService.validateTokenByToken(tokendata)).thenReturn(token);
+        Seat seat = new Seat(1L, "1A", SeatStatus.AVAILABLE.toString());
+        when(concertService.getSeatOnlyData(seatId)).thenReturn(seat);
+        when(concertService.getConcertOptionDataById(seat.getConcertOptionId())).thenThrow(RuntimeException.class);
+
+        //when&&then
+        assertThrows(RuntimeException.class, () -> {
+            reservationManagementFacade.reservationProgress(tokendata, seatId);
+        });
+    }
+
+    @DisplayName("좌석예약 - concert 조회시 null 일때")
+    @Test
+    void reservation_concert_valid_check_reserved()  throws Exception{
+        //given
+        Long seatId = 1L;
+        String tokendata = "Adfasdfs11";
+        Long userId = 1L;
+        LocalDateTime now = LocalDateTime.now();
+        Token token = new Token(userId, "token123123", TokenStatus.WAITING.toString(), now, now.plusMinutes(10));
+        when(tokenService.validateTokenByToken(tokendata)).thenReturn(token);
+        Seat seat = new Seat(1L, "1A", SeatStatus.AVAILABLE.toString());
+        when(concertService.getSeatOnlyData(seatId)).thenReturn(seat);
+        ConcertOption concertOption = new ConcertOption(10L, now.plusHours(10), 10000.0);
+        when(concertService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(concertOption);
+        when(concertService.getConcertData(concertOption.getConcertId())).thenThrow(RuntimeException.class);
 
         //when&&then
         assertThrows(RuntimeException.class, () -> {
@@ -64,14 +140,20 @@ class ReservationManagementFacadeImplTest {
 
     @DisplayName("좌석예약 - 예약정보 확인, 유저가 예약되어 있는 경우")
     @Test
-    void reservation_info_valid_check_user() {
+    void reservation_info_valid_check_user() throws Exception {
         //given
         Long seatId = 1L;
         String tokendata = "Adfasdfs11";
         Long userId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByToken(tokendata)).thenReturn(token);
+        when(tokenService.validateTokenByToken(tokendata)).thenReturn(token);
+        Seat seat = new Seat(1L, "1A", SeatStatus.AVAILABLE.toString());
+        when(concertService.getSeatOnlyData(seatId)).thenReturn(seat);
+        ConcertOption concertOption = new ConcertOption(10L, now.plusHours(10), 10000.0);
+        when(concertService.getConcertOptionDataById(seat.getConcertOptionId())).thenReturn(concertOption);
+        Concert concert = new Concert("concert");
+        when(concertService.getConcertData(concertOption.getConcertId())).thenReturn(concert);
 
         List<Reservation> reservationList = new ArrayList<>();
         reservationList.add(new Reservation(1L, 1L, ReservationStatus.WAITING.toString(), now, now.plusMinutes(5)));
@@ -87,29 +169,5 @@ class ReservationManagementFacadeImplTest {
         });
     }
 
-    @DisplayName("좌석예약 - 예약정보 확인, 좌석정보가 없을경우 ")
-    @Test
-    void reservation_info_valid_check() {
-        //given
-        Long seatId = 1L;
-        String tokendata = "Adfasdfs11";
-        Long userId = 1L;
-        LocalDateTime now = LocalDateTime.now();
-        Token token = new Token(userId, "token123123", TokenStatus.ACTIVE.toString(), now, now.plusMinutes(10));
-        when(tokenQueueService.validateTokenByToken(tokendata)).thenReturn(token);
-
-        when(reservationService.getReservationDataByUserId(userId)).thenReturn(List.of());
-
-        Reservation reservation = new Reservation(1L, 1L, "", now, now.plusMinutes(5));
-        when(reservationService.getReservationData(userId, seatId)).thenReturn(reservation);
-
-        Seat seat = new Seat(1L, "1A", SeatStatus.RESERVED.toString());
-        when(seatService.getSeatOnlyData(seatId)).thenReturn(seat);
-
-        //when && then
-        assertThrows(RuntimeException.class, () -> {
-            reservationManagementFacade.reservationProgress(tokendata, seatId);
-        });
-    }
 
 }
