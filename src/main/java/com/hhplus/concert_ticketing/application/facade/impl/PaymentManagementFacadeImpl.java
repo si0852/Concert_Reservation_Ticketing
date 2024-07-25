@@ -77,15 +77,10 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         Customer customerData = customerService.getCustomerData(validateToken.getUserId());
 
         // --> 잔액 유효성 검증
-//        Double userPoint = customerData.getBalance();
         Double ticketPrice = concertOptionData.getPrice();
         // --> 잔액 부족할 경우
-//        if (ticketPrice > userPoint) {
-//            throw new InSufficientBalanceException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"잔액이 부족합니다.", userPoint));
-//        }
 
         // --> 잔액이 부족하지 않을 경우
-//        Double totalPoint = userPoint - ticketPrice;
         // ---> 잔액 차감 처리
         customerData.subtractBalance(ticketPrice);
         customerService.updateCharge(customerData);
