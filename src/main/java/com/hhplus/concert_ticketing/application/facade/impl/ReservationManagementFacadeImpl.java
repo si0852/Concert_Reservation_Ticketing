@@ -12,31 +12,56 @@ import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.util.exception.ExistDataInfoException;
+import com.hhplus.concert_ticketing.util.exception.LockException;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class ReservationManagementFacadeImpl implements ReservationManagementFacade {
 
     private final TokenService tokenService;
     private final ReservationService reservationService;
     private final ConcertService concertService;
+    private final RedissonClient redissonClient;
 
-    public ReservationManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, ConcertService concertService) {
+    public ReservationManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, ConcertService concertService, RedissonClient redissonClient) {
         this.tokenService = tokenService;
         this.reservationService = reservationService;
         this.concertService = concertService;
+        this.redissonClient = redissonClient;
     }
 
-    @Transactional
     @Override
     public Reservation reservationProgress(String tokenData, Long seatId) throws Exception {
         // 토큰 확인
         Token token = tokenService.validateTokenByToken(tokenData);
+        RLock lock = redissonClient.getLock(token.getToken());
+        try {
+            boolean isLocked = lock.tryLock(100, 10000, TimeUnit.MILLISECONDS);
+            if (!isLocked)
+                throw new LockException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lock 획득 실패", null));
+            Reservation reservation = reservationLogic(token, seatId);
+            log.info("reservation : " + reservation.getStatus());
+            return reservation;
+        } catch (Exception e) {
+            throw new RuntimeException("Error : " + e);
+        }finally {
+            lock.unlock();
+        }
+
+    }
+
+    @Transactional
+    private Reservation reservationLogic(Token token, Long seatId) {
         // 좌석정보 확인
         Seat seatOnlyData = concertService.getSeatOnlyData(seatId);
         // 좌석정보가 이미 예약이 되어 있으면 RuntimeException
@@ -59,7 +84,7 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
             String status = reservationData.getStatus();
             // 예약 정보 상태가 취소가 아니면(예약중이거나 결제 이면) RuntimeException
             if (status.equals(ReservationStatus.PAID.toString()))throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "이미 예약중인 정보입니다.", SeatStatus.RESERVED.toString()));
-            // 예약 정보 상태가 취소이면 상태값 변경
+                // 예약 정보 상태가 취소이면 상태값 변경
             else if(reservationData.getStatus().equals(ReservationStatus.CANCELLED.toString())){
                 reservationData.changeStateReservation();
             }
