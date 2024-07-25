@@ -10,7 +10,7 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
-    List<Reservation> getReservationData(Long userId);
+    List<Reservation> getReservationData(Long seatId);
 
     List<Reservation> getReservationData(String status);
 

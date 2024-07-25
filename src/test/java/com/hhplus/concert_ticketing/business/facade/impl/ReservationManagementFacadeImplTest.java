@@ -160,7 +160,7 @@ class ReservationManagementFacadeImplTest {
         reservationList.add(new Reservation(1L, 2L, ReservationStatus.CANCELLED.toString(), now, now.plusMinutes(5)));
         reservationList.add(new Reservation(1L, 3L, ReservationStatus.PAID.toString(), now, now.plusMinutes(5)));
         reservationList.add(new Reservation(1L, 4L, ReservationStatus.WAITING.toString(), now, now.plusMinutes(5)));
-        when(reservationService.getReservationDataByUserId(userId)).thenReturn(reservationList);
+        when(reservationService.getReservationDataBySeatId(seatId)).thenReturn(reservationList);
 
 
         //when && then

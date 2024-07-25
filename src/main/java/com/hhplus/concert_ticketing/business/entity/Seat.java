@@ -24,6 +24,9 @@ public class Seat {
     @NotBlank
     String seatStatus; // 잠김, 열림
 
+    @Version
+    Long version;
+
     public Seat(Long concertOptionId, String seatNumber, String status) {
         this.concertOptionId = concertOptionId;
         this.seatNumber = seatNumber;

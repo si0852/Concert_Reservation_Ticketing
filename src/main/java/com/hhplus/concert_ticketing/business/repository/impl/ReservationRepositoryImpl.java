@@ -38,8 +38,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> getReservationData(Long userId) {
-        return jpaReservationRepository.findAllByUserId(userId);
+    public List<Reservation> getReservationData(Long seatId) {
+        return jpaReservationRepository.findAllBySeatId(seatId);
     }
 
     @Override

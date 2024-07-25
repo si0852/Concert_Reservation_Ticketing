@@ -85,7 +85,6 @@ class ReservationManagementFacadeImplIntegratedTest {
         Concert concert = concertService.saveConcertData(new Concert("Concert"));
         ConcertOption concertOption = concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), LocalDateTime.now(), 10000.0));
         Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
-//        Reservation saveReservation = reservationService.SaveReservationData(new Reservation(customer.getCustomerId(), seat.getSeatId(), "", now, now.plusMinutes(1)));
 
         //when
         int numberOfThreads = 290;
@@ -96,9 +95,8 @@ class ReservationManagementFacadeImplIntegratedTest {
         Runnable task = () -> {
             long startTime = System.nanoTime();
             try {
-                reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
+                Reservation reservation = reservationManagementFacade.reservationProgress(token.getToken(), seat.getSeatId());
                 Seat seatOnlyData = concertService.getSeatOnlyData(seat.getSeatId());
-                log.info("seatOnlyData : " +seatOnlyData.getSeatStatus());
             } catch (Exception e) {
                 log.error("Exception in task", e);
             } finally {

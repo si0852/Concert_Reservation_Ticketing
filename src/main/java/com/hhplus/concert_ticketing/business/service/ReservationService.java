@@ -10,7 +10,7 @@ public interface ReservationService {
 
     public Reservation getReservationData(Long userId, Long seatId);
 
-    public List<Reservation> getReservationDataByUserId(Long userId);
+    public List<Reservation> getReservationDataBySeatId(Long seatId);
 
     public List<Reservation> getReservationDataByStatus(String status);
 

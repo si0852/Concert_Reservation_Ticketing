@@ -12,7 +12,10 @@ import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.util.exception.ExistDataInfoException;
+import com.hhplus.concert_ticketing.util.exception.NoInfoException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ import java.util.List;
 @Component
 public class ReservationManagementFacadeImpl implements ReservationManagementFacade {
 
+    private static final Logger log = LoggerFactory.getLogger(ReservationManagementFacadeImpl.class);
     private final TokenService tokenService;
     private final ReservationService reservationService;
     private final ConcertService concertService;
@@ -47,9 +51,9 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         concertService.getConcertData(concertOptionData.getConcertId());
 
         // user 1명당 예약은 1명 제한을 두었다. 해당 케이스 validation check
-        List<Reservation> reservationDataByUserId = reservationService.getReservationDataByUserId(token.getUserId());
+        List<Reservation> reservationDataByUserId = reservationService.getReservationDataBySeatId(seatOnlyData.getSeatId());
+        log.info("reservation Data reservationDataByUserId :" + reservationDataByUserId.toString());
         List<Reservation> filterOutCancel = reservationDataByUserId.stream().filter(data -> data.getStatus().equals(ReservationStatus.CANCELLED.toString())).toList();
-
         if(filterOutCancel.size() > 0) throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "이미 예약된 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
 
         // 예약 정보 확인

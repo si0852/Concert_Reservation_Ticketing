@@ -17,6 +17,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 //    @Lock(LockModeType.PESSIMISTIC_WRITE)
 //    @Query("select r from Reservation r where r.reservationId = :reservationId")
 //    Optional<Reservation> findByReservationIdForUpdate(Long reservationId);
-    List<Reservation> findAllByUserId(Long userId);
+    List<Reservation> findAllBySeatId(Long seatId);
     List<Reservation> findAllByStatus(String status);
 }
