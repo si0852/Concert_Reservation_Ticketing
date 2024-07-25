@@ -9,13 +9,19 @@ import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import com.hhplus.concert_ticketing.util.exception.InSufficientBalanceException;
 import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
+import com.hhplus.concert_ticketing.util.exception.LockException;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
 
@@ -24,18 +30,36 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
     private final PaymentService paymentService;
     private final CustomerService customerService;
     private final ConcertService concertService;
+    private final RedissonClient redissonClient;
 
-    public PaymentManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, PaymentService paymentService, CustomerService customerService, ConcertService concertService) {
+    public PaymentManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, PaymentService paymentService, CustomerService customerService, ConcertService concertService, RedissonClient redissonClient) {
         this.tokenService = tokenService;
         this.reservationService = reservationService;
         this.paymentService = paymentService;
         this.customerService = customerService;
         this.concertService = concertService;
+        this.redissonClient = redissonClient;
+    }
+
+    @Override
+    public Payment paymentProgress(Long reservationId, String token)  throws Exception{
+
+        RLock lock = redissonClient.getLock(token);
+        try {
+            boolean isLocked = lock.tryLock(100, 10000, TimeUnit.MILLISECONDS);
+            if (!isLocked)
+                throw new LockException(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lock 획득 실패", null));
+            Payment payment = paymentLogic(reservationId, token);
+            return payment;
+        } catch (Exception e) {
+            throw new RuntimeException("Error : " + e);
+        }finally {
+            lock.unlock();
+        }
     }
 
     @Transactional
-    @Override
-    public Payment paymentProgress(Long reservationId, String token)  throws Exception{
+    private Payment paymentLogic(Long reservationId, String token) throws Exception{
         // 예약 상태 확인
         Reservation validationReservationInfo = reservationService.getReservationDataByReservationId(reservationId);
 

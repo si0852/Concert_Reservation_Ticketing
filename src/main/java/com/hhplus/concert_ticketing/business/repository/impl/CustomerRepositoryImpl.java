@@ -28,4 +28,9 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     public Customer updateCharge(Customer customer) {
         return jpaCustomerRepository.save(customer);
     }
+
+    @Override
+    public void deleteAll() {
+        jpaCustomerRepository.deleteAll();
+    }
 }

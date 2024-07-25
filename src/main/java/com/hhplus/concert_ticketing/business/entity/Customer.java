@@ -40,7 +40,7 @@ public class Customer {
 
     public void chargePoint(Double point) {
         if(point < 1000) throw new BadRequestException(new ResponseDto(HttpServletResponse.SC_BAD_REQUEST, "1000원 이상의 금액을 충전해주세요", point));
-        Double total = getBalance() + point;
-        setBalance(total);
+        Double total = this.balance + point;
+        this.balance = total;
     }
 }
