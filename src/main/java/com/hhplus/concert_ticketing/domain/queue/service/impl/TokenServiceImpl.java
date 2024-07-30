@@ -8,10 +8,13 @@ import com.hhplus.concert_ticketing.status.TokenStatus;
 import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Service
 public class TokenServiceImpl implements TokenService {
@@ -22,6 +25,22 @@ public class TokenServiceImpl implements TokenService {
         this.tokenRepository = tokenRepository;
     }
 
+    @Transactional
+    @Override
+    public Token validateToken(Long userId) {
+        Token token = tokenRepository.getToken(userId);
+        return token;
+    }
+
+    @Transactional
+    @Override
+    public Token validateToken(String token) {
+        Token tokenByToken = tokenRepository.getTokenByToken(token);
+        return tokenByToken;
+    }
+
+
+    @Transactional
     @Override
     public Token generateToken(Long userId) {
         String token = UUID.randomUUID().toString();
@@ -29,28 +48,38 @@ public class TokenServiceImpl implements TokenService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createdAt = now;
         LocalDateTime expiresAt = now.plusHours(1);
-        return new Token(userId, token, status, createdAt, expiresAt);
+        Token saveToken = tokenRepository.saveToken(new Token(userId, token, status, createdAt, expiresAt));
+        return saveToken;
     }
 
+    @Transactional
     @Override
     public Token generateToken(Long userId, String token) {
         String status = TokenStatus.WAITING.toString();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createdAt = now;
         LocalDateTime expiresAt = now.plusHours(1);
-        return new Token(userId, token, status, createdAt, expiresAt);
+        Token saveToken = tokenRepository.saveToken(new Token(userId, token, status, createdAt, expiresAt));
+        return saveToken;
     }
+
+    @Transactional
+    @Override
+    public Integer getTokenPosition(String token) {
+        List<Token> waitingToken = tokenRepository.getTokenListByStatus(TokenStatus.WAITING.toString());
+        int index = IntStream.range(0, waitingToken.size())
+                .filter(data -> Objects.equals(waitingToken.get(data).getToken(), token))
+                .findFirst().orElse(-1);
+        return index+1;
+    }
+
 
     @Override
     public Token saveToken(Token token) {
         return tokenRepository.saveToken(token);
     }
 
-    @Override
-    public Token validateToken(Long userId) {
-        Token token = tokenRepository.getToken(userId);
-        return token;
-    }
+
 
     @Override
     public Token validateTokenByTokenId(Long tokenId) {

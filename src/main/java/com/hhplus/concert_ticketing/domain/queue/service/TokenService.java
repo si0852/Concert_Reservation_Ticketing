@@ -6,11 +6,15 @@ import java.util.List;
 
 public interface TokenService {
 
+    Token validateToken(Long userId);
+    Token validateToken(String token);
     Token generateToken(Long userId);
     Token generateToken(Long userId, String token);
+
+    Integer getTokenPosition(String token);
+
     Token saveToken(Token token);
 
-    Token validateToken(Long userId);
 
     Token validateTokenByTokenId(Long tokenId);
 

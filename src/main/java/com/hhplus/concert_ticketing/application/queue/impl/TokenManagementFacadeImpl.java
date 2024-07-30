@@ -4,6 +4,7 @@ import com.hhplus.concert_ticketing.application.queue.TokenManagementFacade;
 import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.presentation.queue.dto.TokenDto;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import com.hhplus.concert_ticketing.util.exception.ExistDataInfoException;
@@ -20,51 +21,60 @@ import java.util.stream.IntStream;
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
-    private final Integer maxActiveTokens = 10;
+    private final Integer maxActiveTokens = 40;
 
     public TokenManagementFacadeImpl(TokenService tokenService) {
         this.tokenService = tokenService;
     }
 
-    @Transactional
     @Override
     public Token insertToken(Long userId) {
         // 토큰 존재여부 확인
         // -> userId 조건으로 토큰 존재여부 확인
-        Token token = tokenService.validateToken(userId);
-        // -> status: ACTIVE 조건으로 토큰 존재여부 확인
-        List<Token> activeToken = tokenService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
-        // -> status: WAITING 조건으로 토큰 존재여부 확인
-        List<Token> waitingToken = tokenService.getTokenListByStatus(TokenStatus.WAITING.toString());
+        Token token;
+
+        try {
+            token = tokenService.validateToken(userId);
+        } catch (Exception e) {
+            throw e;
+        }
 
         Token generatedToken = null;
 
-        // 토큰 발급
-        // -> userId로 조회된 토큰이 없을 경우
-        if(token == null) generatedToken = tokenService.generateToken(userId);
-        // -> userId로 조회된 토큰이 이미 존재 && ACTIVE 상태이면 예약중이므로 익셉션 발생
-        if(token != null && (token.getStatus().equals(TokenStatus.ACTIVE.toString()))) throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
+        try {
+            // 토큰 발급
+            // -> userId로 조회된 토큰이 없을 경우
+            if (token == null) generatedToken = tokenService.generateToken(userId);
+            // -> userId로 조회된 토큰이 이미 존재 && ACTIVE 상태이면 예약중이므로 익셉션 발생
+            if (token != null && (token.getStatus().equals(TokenStatus.ACTIVE.toString())))
+                throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약 진행중인 데이터가 존재합니다.", SeatStatus.RESERVED.toString()));
 
-        // -> userId로 조회된 토큰이 이미 존재 && EXPIRED 상태이면 발급날짜만 발급
-        else if (token != null && token.getStatus().equals(TokenStatus.EXPIRED.toString())) generatedToken = tokenService.generateToken(userId, token.getToken());
+                // -> userId로 조회된 토큰이 이미 존재 && EXPIRED 상태이면 발급날짜만 발급
+            else if (token != null && token.getStatus().equals(TokenStatus.EXPIRED.toString()))
+                generatedToken = tokenService.generateToken(userId, token.getToken());
 
-        // -> userId로 조회된 토큰이 존재하고 Waiting 상태이면 generateToken은 null 값이다.
-
-        // 대기열에는 40개의 토큰만 들어올 수 있다. activeSpace는 대기열의 남은 자리를 의미한다.
-        int activeSpace = maxActiveTokens - activeToken.size();
-        // 대기열 남은 자리 - Waiting 상태인 토큰 수
-        int spaceQueue = activeSpace - waitingToken.size();
-
-        // 대기열에 자리가 남아있다면
-        if (activeSpace>0 && spaceQueue>0) {
-            generatedToken.changeActive();
+        } catch (Exception e) {
+            throw e;
         }
 
-
-        return tokenService.saveToken(generatedToken);
+        return generatedToken;
     }
 
-    @Transactional
+    @Override
+    public TokenDto getTokenData(String token) {
+        Token tokenInf;
+        try {
+            tokenInf = tokenService.validateToken(token);
+        } catch (Exception e) {
+            throw e;
+        }
+        Integer tokenPosition = tokenService.getTokenPosition(token);
+        Integer activeTokenCount = tokenService.getTokenListByStatus(TokenStatus.ACTIVE.toString()).size();
+        Integer waitingCount = tokenPosition + activeTokenCount;
+        TokenDto tokenDto = new TokenDto(token, tokenPosition, tokenInf.getExpiresAt(), waitingCount);
+        return tokenDto;
+    }
+
     @Override
     public Integer getTokenPosition(String token) {
         try {
