@@ -1,11 +1,9 @@
 package com.hhplus.concert_ticketing.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hhplus.concert_ticketing.business.entity.Token;
-import com.hhplus.concert_ticketing.business.service.TokenService;
-import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
+import com.hhplus.concert_ticketing.domain.queue.entity.Token;
+import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.status.TokenStatus;
-import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +14,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-
-import java.time.LocalDateTime;
 
 @Component
 @Slf4j
