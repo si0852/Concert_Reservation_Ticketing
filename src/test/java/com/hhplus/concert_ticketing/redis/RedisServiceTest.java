@@ -12,10 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Set;
 
 @SpringBootTest
 public class RedisServiceTest {
@@ -47,7 +50,13 @@ public class RedisServiceTest {
             redisTemplate.opsForZSet().add("Active", json, Double.valueOf(LocalDateTime.now().plusSeconds(i).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"))));
             redisTemplate.expire("Active", Duration.ofMinutes(5));
         }
+
+        ZSetOperations<String, String> stringStringZSetOperations = redisTemplate.opsForZSet();
+
+        Set<String> active = stringStringZSetOperations.range("Active", 0, 10);
+        log.info("active : " + Arrays.toString(active.toArray()));
     }
+
 }
 
 

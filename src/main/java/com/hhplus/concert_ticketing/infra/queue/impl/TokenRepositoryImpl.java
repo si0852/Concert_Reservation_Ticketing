@@ -3,6 +3,7 @@ package com.hhplus.concert_ticketing.infra.queue.impl;
 import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.queue.repository.TokenRepository;
 import com.hhplus.concert_ticketing.infra.queue.JpaTokenRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.List;
 public class TokenRepositoryImpl implements TokenRepository {
 
     private final JpaTokenRepository jpaTokenRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public TokenRepositoryImpl(JpaTokenRepository jpaTokenRepository) {
+    public TokenRepositoryImpl(JpaTokenRepository jpaTokenRepository, RedisTemplate<String, String> redisTemplate) {
         this.jpaTokenRepository = jpaTokenRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override

@@ -21,7 +21,6 @@ import java.util.stream.IntStream;
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
-    private final Integer maxActiveTokens = 40;
 
     public TokenManagementFacadeImpl(TokenService tokenService) {
         this.tokenService = tokenService;

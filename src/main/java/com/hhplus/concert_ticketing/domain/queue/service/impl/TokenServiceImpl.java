@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 public class TokenServiceImpl implements TokenService {
 
     private final TokenRepository tokenRepository;
+    private final Integer maxActiveTokens = 40;
 
     public TokenServiceImpl(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
@@ -44,7 +45,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Token generateToken(Long userId) {
         String token = UUID.randomUUID().toString();
-        String status = TokenStatus.WAITING.toString();
+        String status = setTokenStatus().toString();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createdAt = now;
         LocalDateTime expiresAt = now.plusHours(1);
@@ -55,12 +56,18 @@ public class TokenServiceImpl implements TokenService {
     @Transactional
     @Override
     public Token generateToken(Long userId, String token) {
-        String status = TokenStatus.WAITING.toString();
+        String status = setTokenStatus().toString();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createdAt = now;
         LocalDateTime expiresAt = now.plusHours(1);
         Token saveToken = tokenRepository.saveToken(new Token(userId, token, status, createdAt, expiresAt));
         return saveToken;
+    }
+
+    private TokenStatus setTokenStatus() {
+        Integer activeTokenCount = getTokenListByStatus(TokenStatus.ACTIVE.toString()).size();
+        if(activeTokenCount < maxActiveTokens) return TokenStatus.ACTIVE;
+        return TokenStatus.WAITING;
     }
 
     @Transactional

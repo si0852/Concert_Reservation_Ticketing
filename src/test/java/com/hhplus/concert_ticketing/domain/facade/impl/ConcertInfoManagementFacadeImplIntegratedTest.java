@@ -10,6 +10,8 @@ import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.infra.concert.JpaConcertOptionRepository;
 import com.hhplus.concert_ticketing.infra.concert.JpaConcertRepository;
 import com.hhplus.concert_ticketing.infra.queue.JpaTokenRepository;
+import com.hhplus.concert_ticketing.presentation.concert.dto.ConcertOptionDto;
+import com.hhplus.concert_ticketing.presentation.concert.dto.SeatDto;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +74,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token.getToken(), concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -90,7 +92,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token.getToken(), concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -110,7 +112,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         Long concertId = concert.getConcertId();
         // then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token.getToken(), concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -134,7 +136,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         concertService.saveConcertOption(new ConcertOption(concertId, now.plusHours(5), 10000.0));
 
         //when
-        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(token.getToken(), concertId);
+        List<ConcertOptionDto> concertOption = concertInfoManagementFacade.getConcertOption(concertId);
         // then
         assertThat(concertOption.size()).isEqualTo(3);
     }
@@ -154,7 +156,7 @@ class ConcertInfoManagementFacadeImplIntegratedTest {
         Seat seat = concertService.saveSeatData(new Seat(concertOption.getConcertOptionId(), "1A", SeatStatus.AVAILABLE.toString()));
 
         // when
-        List<Seat> seatData = concertInfoManagementFacade.getSeatData(concertOption.getConcertOptionId(), token.getToken());
+        List<SeatDto> seatData = concertInfoManagementFacade.getSeatData(concertOption.getConcertOptionId());
 
         //then
         assertEquals(seatData.get(0).getSeatId(), seat.getSeatId());

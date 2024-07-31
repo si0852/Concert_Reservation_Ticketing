@@ -10,7 +10,10 @@ import com.hhplus.concert_ticketing.domain.concert.service.ConcertService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.util.exception.NoInfoException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,11 +31,22 @@ public class ConcertServiceImpl implements ConcertService {
         this.concertOptionRepository = concertOptionRepository;
     }
 
+    @CacheEvict(value = "concertData", key = "#concert.concertId")
+    @Transactional
     @Override
     public Concert saveConcertData(Concert concert) {
         return concertRepository.saveData(concert);
     }
 
+    @CacheEvict(value = "concertData", key = "#concert.concertId")
+    @Transactional
+    @Override
+    public Concert updateConcertData(Concert concert) {
+        return concertRepository.saveData(concert);
+    }
+
+    @Cacheable(value = "concertData", key = "#concertId")
+    @Transactional
     @Override
     public Concert getConcertData(Long concertId) {
         Concert concertData = concertRepository.getConcertData(concertId);
@@ -40,27 +54,23 @@ public class ConcertServiceImpl implements ConcertService {
         return concertData;
     }
 
-    @Override
-    public ConcertOption saveConcertOption(ConcertOption concertOption) {
-        return concertOptionRepository.saveData(concertOption);
-    }
-
-    @Override
-    public ConcertOption updateConcertOption(ConcertOption concertOption) {
-        return concertOptionRepository.update(concertOption);
-    }
-
-    @Override
-    public List<ConcertOption> getConcertOptionData(Long concertId) {
-        List<ConcertOption> concertOptionData = concertOptionRepository.getConcertOptionData(concertId);
-        if(concertOptionData.size() == 0) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 정보가 없습니다.", 0));
-        return concertOptionData;
-    }
-
+    @Cacheable("concertData")
+    @Transactional
     @Override
     public List<Concert> getConcertData() {
         return concertRepository.getConcertData();
     }
+
+
+    @Cacheable(value = "concertOptionData", key = "#concertId")
+    @Transactional
+    @Override
+    public List<ConcertOption> getConcertOptionData(Long concertId) {
+        List<ConcertOption> concertOptionData = concertOptionRepository.getConcertOptionData(concertId);
+        if(concertOptionData.isEmpty()) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 정보가 없습니다.", 0));
+        return concertOptionData;
+    }
+
 
     @Override
     public ConcertOption getConcertOptionDataByLocalDate(Long concertOptionId) {
@@ -70,8 +80,8 @@ public class ConcertServiceImpl implements ConcertService {
     }
 
     @Override
-    public ConcertOption getConcertOptionDataById(Long concertOptionid) {
-        ConcertOption concertOptionDataById = concertOptionRepository.getConcertOptionDataById(concertOptionid);
+    public ConcertOption getConcertOptionDataById(Long concertOptionId) {
+        ConcertOption concertOptionDataById = concertOptionRepository.getConcertOptionDataById(concertOptionId);
         if(concertOptionDataById == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 상세 정보가 없습니다.", null));
         return concertOptionDataById;
     }
@@ -83,11 +93,25 @@ public class ConcertServiceImpl implements ConcertService {
         return concertDate;
     }
 
+    @CacheEvict(value = "concertOptionData", key = "#concertOption.concertOptionId")
+    @Override
+    public ConcertOption saveConcertOption(ConcertOption concertOption) {
+        return concertOptionRepository.saveData(concertOption);
+    }
+
+    @CacheEvict(value = "concertOptionData", key = "#concertOption.concertOptionId")
+    @Override
+    public ConcertOption updateConcertOption(ConcertOption concertOption) {
+        return concertOptionRepository.update(concertOption);
+    }
+
+
     @Override
     public Seat saveSeatData(Seat seat) {
         return seatRepository.saveData(seat);
     }
 
+    @Transactional
     @Override
     public List<Seat> getSeatData(Long concertOptionId, String status) {
         List<Seat> seatData = seatRepository.getSeatData(concertOptionId, status);

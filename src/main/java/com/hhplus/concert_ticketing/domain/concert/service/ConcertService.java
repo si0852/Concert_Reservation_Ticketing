@@ -9,9 +9,11 @@ import java.util.List;
 
 public interface ConcertService {
 
-    public Concert saveConcertData(Concert concert);
+    Concert saveConcertData(Concert concert);
 
-    public Concert getConcertData(Long concertId);
+    Concert updateConcertData(Concert concert);
+
+    Concert getConcertData(Long concertId);
 
     ConcertOption saveConcertOption(ConcertOption concertOption);
 

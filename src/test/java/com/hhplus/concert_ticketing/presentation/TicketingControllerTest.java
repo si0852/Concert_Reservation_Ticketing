@@ -14,6 +14,8 @@ import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.concert.service.ConcertService;
 import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.infra.queue.JpaTokenRepository;
+import com.hhplus.concert_ticketing.presentation.concert.dto.ConcertOptionDto;
+import com.hhplus.concert_ticketing.presentation.concert.dto.SeatDto;
 import com.hhplus.concert_ticketing.presentation.dto.response.*;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
@@ -180,19 +182,9 @@ class TicketingControllerTest {
         concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), now, 10000.0));
         concertService.saveConcertOption(new ConcertOption(concert.getConcertId(), now, 10000.0));
 
-        List<ConcertOption> concertOptions = concertInfoManagementFacade.getConcertOption(tokenStr, concert.getConcertId());
-        List<ConcertDateResponse> responseData = new ArrayList<>();
+        List<ConcertOptionDto> concertOptions = concertInfoManagementFacade.getConcertOption(concert.getConcertId());
 
-        for(ConcertOption concertOption : concertOptions) {
-            LocalDateTime concertDate = concertOption.getConcertDate();
-            String date = concertDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + concertDate.getHour() + concertDate.getMinute();
-            ConcertDateResponse dummyData = ConcertDateResponse.builder()
-                    .concertOptionId(concertOption.getConcertOptionId())
-                    .concertDate(date)
-                    .build();
-            responseData.add(dummyData);
-        }
-        ResponseDto expectedResponse = new ResponseDto(HttpServletResponse.SC_OK, "Success", responseData);
+        ResponseDto expectedResponse = new ResponseDto(HttpServletResponse.SC_OK, "Success", concertOptions);
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -225,13 +217,9 @@ class TicketingControllerTest {
         Seat seat2 = new Seat(saveOption.getConcertOptionId(), "2A", SeatStatus.AVAILABLE.toString());
         concertService.saveSeatData(seat2);
 
-        List<Seat> Seats = concertInfoManagementFacade.getSeatData(saveOption.getConcertOptionId(), tokenStr);
-        List<SeatResponse> seatResponses = new ArrayList<>();
+        List<SeatDto> Seats = concertInfoManagementFacade.getSeatData(saveOption.getConcertOptionId());
 
-        for (Seat seat : Seats) {
-            seatResponses.add(new SeatResponse(seat.getSeatId(), seat.getSeatNumber(), seat.getSeatStatus()));
-        }
-        ResponseDto expectedResponse = new ResponseDto(HttpServletResponse.SC_OK, "Success", seatResponses);
+        ResponseDto expectedResponse = new ResponseDto(HttpServletResponse.SC_OK, "Success", Seats);
         String expectedJson = mapper.writeValueAsString(expectedResponse);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders

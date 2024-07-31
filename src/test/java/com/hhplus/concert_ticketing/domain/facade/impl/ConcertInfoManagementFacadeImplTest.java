@@ -7,6 +7,7 @@ import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
 import com.hhplus.concert_ticketing.infra.queue.impl.TokenRepositoryImpl;
 import com.hhplus.concert_ticketing.domain.concert.service.impl.ConcertServiceImpl;
 import com.hhplus.concert_ticketing.domain.queue.service.impl.TokenServiceImpl;
+import com.hhplus.concert_ticketing.presentation.concert.dto.ConcertOptionDto;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,14 +49,12 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concert_is_null() throws Exception {
         //given
-        String token = "asdfasdfsa";
         Long concertId = 1L;
-        LocalDateTime now = LocalDateTime.now();
         when(concertService.getConcertData(concertId)).thenThrow(RuntimeException.class);
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token, concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -64,18 +63,16 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concertOption_list_size_0() throws Exception {
         //given
-        String token = "asdfasdfsa";
         Long concertId = 1L;
         Concert concert = new Concert("콘서트");
         when(concertService.getConcertData(concertId)).thenReturn(concert);
 
         //when
-//        List<ConcertOption> concertOptionList = List.of();
         when(concertService.getConcertOptionData(concertId)).thenThrow(RuntimeException.class);
 
         //then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token, concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -83,7 +80,6 @@ class ConcertInfoManagementFacadeImplTest {
     @Test
     void checking_concertOption_list_size_1() throws Exception {
         //given
-        String token = "asdfasdfsa";
         Long concertId = 1L;
         LocalDateTime now = LocalDateTime.now();
         Concert concert = new Concert("콘서트");
@@ -97,7 +93,7 @@ class ConcertInfoManagementFacadeImplTest {
         );
 
         when(concertService.getConcertOptionData(concertId)).thenReturn(concertOptionList);
-        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(token, concertId);
+        List<ConcertOptionDto> concertOption = concertInfoManagementFacade.getConcertOption(concertId);
         //then
         assertThat(concertOption).isEqualTo(concertOptionList);
     }
@@ -107,14 +103,13 @@ class ConcertInfoManagementFacadeImplTest {
     void validate_check_ConcertOption_is_null() throws Exception {
         //given
         Long concertOptionId = 1L;
-        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         when(concertService.getConcertOptionDataByLocalDate(concertOptionId)).thenThrow(RuntimeException.class);
 
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getSeatData(concertOptionId, tokend);
+            concertInfoManagementFacade.getSeatData(concertOptionId);
         });
     }
 
@@ -123,7 +118,6 @@ class ConcertInfoManagementFacadeImplTest {
     void validate_check_Seat_is_null() throws Exception {
         //given
         Long concertOptionId = 1L;
-        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
 
@@ -134,7 +128,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getSeatData(concertOptionId, tokend);
+            concertInfoManagementFacade.getSeatData(concertOptionId);
         });
     }
 
@@ -146,7 +140,6 @@ class ConcertInfoManagementFacadeImplTest {
         //given
         Long concertOptionId = 2L;
         Long concertId = 2L;
-        String tokend = "adfasdf";
         LocalDateTime now = LocalDateTime.now();
         String status = SeatStatus.AVAILABLE.toString();
 
@@ -163,6 +156,6 @@ class ConcertInfoManagementFacadeImplTest {
                 thenReturn(seatData);
 
         // when && then
-        assertEquals(seatData.size(), concertInfoManagementFacade.getSeatData(concertOptionId, tokend).size());
+        assertEquals(seatData.size(), concertInfoManagementFacade.getSeatData(concertOptionId).size());
     }
 }
