@@ -40,7 +40,7 @@ public class ReservationManagementFacadeImpl implements ReservationManagementFac
         // 좌석정보 확인
         Seat seatOnlyData = concertService.getSeatOnlyData(seatId);
         // 좌석정보가 이미 예약이 되어 있으면 RuntimeException
-        if(seatOnlyData.getSeatStatus().equals(SeatStatus.RESERVED.toString())) {
+        if(!seatOnlyData.getSeatStatus().equals(SeatStatus.AVAILABLE.toString())) {
             throw new ExistDataInfoException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN, "예약된 좌석입니다.", SeatStatus.RESERVED.toString()));}
 
         ConcertOption concertOptionData = concertService.getConcertOptionDataById(seatOnlyData.getConcertOptionId());

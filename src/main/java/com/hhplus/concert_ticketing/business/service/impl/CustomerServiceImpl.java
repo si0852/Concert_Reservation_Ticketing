@@ -7,6 +7,7 @@ import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.util.exception.NoInfoException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -17,11 +18,13 @@ public class CustomerServiceImpl implements CustomerService {
         this.customerRepository = customerRepository;
     }
 
+    @Transactional
     @Override
     public Customer saveCustomer(Customer customer) {
         return customerRepository.saveData(customer);
     }
 
+    @Transactional
     @Override
     public Customer getCustomerData(Long customerId) {
         Customer customerData = customerRepository.getCustomerData(customerId);
