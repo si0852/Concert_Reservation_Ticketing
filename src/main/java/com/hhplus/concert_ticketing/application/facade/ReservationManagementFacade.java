@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.application.facade;
 
-import com.hhplus.concert_ticketing.business.entity.Reservation;
+import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
 
 public interface ReservationManagementFacade {
 

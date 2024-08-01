@@ -1,8 +1,8 @@
 package com.hhplus.concert_ticketing.application.facade.impl;
 
-import com.hhplus.concert_ticketing.business.entity.Token;
+import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.application.facade.TokenManagementFacade;
-import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;

@@ -1,14 +1,12 @@
 package com.hhplus.concert_ticketing.application.facade.impl;
 
-import com.hhplus.concert_ticketing.business.entity.Concert;
-import com.hhplus.concert_ticketing.business.entity.ConcertOption;
-import com.hhplus.concert_ticketing.business.entity.Seat;
-import com.hhplus.concert_ticketing.business.entity.Token;
+import com.hhplus.concert_ticketing.domain.concert.entity.Concert;
+import com.hhplus.concert_ticketing.domain.concert.entity.ConcertOption;
+import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
 import com.hhplus.concert_ticketing.application.facade.ConcertInfoManagementFacade;
-import com.hhplus.concert_ticketing.business.service.ConcertService;
-import com.hhplus.concert_ticketing.business.service.TokenService;
+import com.hhplus.concert_ticketing.domain.concert.service.ConcertService;
+import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.status.SeatStatus;
-import com.hhplus.concert_ticketing.status.TokenStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,7 +1,12 @@
 package com.hhplus.concert_ticketing.presentation;
 
 import com.hhplus.concert_ticketing.application.facade.*;
-import com.hhplus.concert_ticketing.business.entity.*;
+import com.hhplus.concert_ticketing.domain.concert.entity.ConcertOption;
+import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
+import com.hhplus.concert_ticketing.domain.payment.entity.Payment;
+import com.hhplus.concert_ticketing.domain.point.entity.Customer;
+import com.hhplus.concert_ticketing.domain.queue.entity.Token;
+import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
 import com.hhplus.concert_ticketing.presentation.dto.request.BalanceRequest;
 import com.hhplus.concert_ticketing.presentation.dto.request.PaymentRequest;
 import com.hhplus.concert_ticketing.presentation.dto.request.ReservationRequest;

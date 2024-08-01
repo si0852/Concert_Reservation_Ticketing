@@ -1,13 +1,19 @@
 package com.hhplus.concert_ticketing.application.facade.impl;
 
-import com.hhplus.concert_ticketing.business.entity.*;
+import com.hhplus.concert_ticketing.domain.concert.entity.ConcertOption;
+import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
+import com.hhplus.concert_ticketing.domain.concert.service.ConcertService;
 import com.hhplus.concert_ticketing.application.facade.PaymentManagementFacade;
-import com.hhplus.concert_ticketing.business.service.*;
+import com.hhplus.concert_ticketing.domain.payment.entity.Payment;
+import com.hhplus.concert_ticketing.domain.point.entity.Customer;
+import com.hhplus.concert_ticketing.domain.payment.service.PaymentService;
+import com.hhplus.concert_ticketing.domain.point.service.CustomerService;
+import com.hhplus.concert_ticketing.domain.queue.entity.Token;
+import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
+import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
+import com.hhplus.concert_ticketing.domain.reservation.service.ReservationService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.ReservationStatus;
-import com.hhplus.concert_ticketing.status.SeatStatus;
-import com.hhplus.concert_ticketing.status.TokenStatus;
-import com.hhplus.concert_ticketing.util.exception.InSufficientBalanceException;
 import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;

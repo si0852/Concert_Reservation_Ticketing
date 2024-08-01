@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.application.facade;
 
-import com.hhplus.concert_ticketing.business.entity.Token;
+import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 
 public interface TokenManagementFacade {
 

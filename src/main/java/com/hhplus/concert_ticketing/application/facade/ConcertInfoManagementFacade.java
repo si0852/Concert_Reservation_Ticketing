@@ -1,8 +1,8 @@
 package com.hhplus.concert_ticketing.application.facade;
 
-import com.hhplus.concert_ticketing.business.entity.Concert;
-import com.hhplus.concert_ticketing.business.entity.ConcertOption;
-import com.hhplus.concert_ticketing.business.entity.Seat;
+import com.hhplus.concert_ticketing.domain.concert.entity.Concert;
+import com.hhplus.concert_ticketing.domain.concert.entity.ConcertOption;
+import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
 
 import java.util.List;
 

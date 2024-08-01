@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.application.facade;
 
-import com.hhplus.concert_ticketing.business.entity.Customer;
+import com.hhplus.concert_ticketing.domain.point.entity.Customer;
 
 public interface ChargeManagementFacade {
 
