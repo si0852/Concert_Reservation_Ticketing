@@ -2,7 +2,9 @@ package com.hhplus.concert_ticketing.application.queue;
 
 public interface StatusManagementFacade {
 
-    Boolean expiredToken();
+    void expiredToken();
 
-    Boolean expiredReservationStatus();
+    void convertToActive();
+
+    void expiredReservationStatus();
 }

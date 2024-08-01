@@ -5,6 +5,7 @@ import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.presentation.dto.response.TokenResponse;
 import com.hhplus.concert_ticketing.presentation.queue.dto.TokenDto;
+import com.hhplus.concert_ticketing.presentation.queue.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -38,11 +39,11 @@ public class QueueController {
     @Parameters({
             @Parameter(name = "userId", description = "유저 id", example = "1")
     })
-    public ResponseEntity<ResponseDto> generateToken(@RequestParam Long userId) {
+    public ResponseEntity<?> generateToken(@RequestParam String userId) {
         try {
-            Token token = tokenManagementFacade.insertToken(userId);
-            TokenDto dto = new TokenDto(token.getToken(), 0, token.getExpiresAt(), 0);
-            return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", dto));
+            log.info("msg : " + userId);
+            UserDto userDto = tokenManagementFacade.addToQueue(userId);
+            return ResponseEntity.ok(new ResponseDto(HttpServletResponse.SC_OK, "Success", userDto));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseDto(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error", null));

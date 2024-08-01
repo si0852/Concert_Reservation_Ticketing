@@ -3,13 +3,17 @@ package com.hhplus.concert_ticketing.application.queue.impl;
 import com.hhplus.concert_ticketing.application.queue.TokenManagementFacade;
 import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
+import com.hhplus.concert_ticketing.domain.user.service.impl.UserQueueService;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.presentation.queue.dto.TokenDto;
+import com.hhplus.concert_ticketing.presentation.queue.dto.UserDto;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import com.hhplus.concert_ticketing.status.TokenStatus;
 import com.hhplus.concert_ticketing.util.exception.ExistDataInfoException;
 import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +21,66 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Component
 public class TokenManagementFacadeImpl implements TokenManagementFacade {
 
     private final TokenService tokenService;
+    private final UserQueueService userQueueService;
+    private final static Integer maxQueue = 40;
+    private final static String waitingKey = "Waiting";
 
-    public TokenManagementFacadeImpl(TokenService tokenService) {
+    public TokenManagementFacadeImpl(TokenService tokenService, UserQueueService userQueueService) {
         this.tokenService = tokenService;
+        this.userQueueService = userQueueService;
+    }
+
+    @Override
+    public UserDto addToQueue(String userId) {
+        try {
+            // waiting 대기열에 userId 있는지 확인
+            boolean existed = userQueueService.whetherToIncludeQueue(userId);
+            log.info("exist : " + existed);
+            // active, waiting 대기열 Counting
+            Integer activeCount = userQueueService.countActiveUserSize();
+            Integer waitingCount = Math.toIntExact(userQueueService.countWaitingUser().size(waitingKey));
+
+            // waiting 대기열에 userId가 존재하지 않고
+            if(!existed) {
+                log.info("activeCount : " + activeCount);
+                // active 수가 40보다 크다면 waiting 대기열에 추가 & ttl 설정(10분)
+               if(activeCount >= 40) {
+                   userQueueService.addToQueue(userId);
+                   userQueueService.expiredActiveQueue(userId);
+               }
+               // 아니면 active 대기열에 추가
+               else userQueueService.convertWaitingToActive(userId);
+            }else {
+                throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
+            }
+            Integer totalWaitingCount = Math.toIntExact(waitingCount + activeCount);
+            return new UserDto(0,totalWaitingCount);
+        } catch (Exception e) {
+            log.info("error : " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public UserDto getQueueDataByUser(String userId) {
+        boolean existed = userQueueService.whetherToIncludeQueue(userId);
+        Integer activeCount = userQueueService.countActiveUserSize();
+        Integer waitingCount = Math.toIntExact(userQueueService.countWaitingUser().size(waitingKey));
+        Integer totalWaitingCount = Math.toIntExact(waitingCount + activeCount);
+
+        UserDto userDto = null;
+        //
+        if(existed) userDto = new UserDto(0, totalWaitingCount);
+        boolean activeExisted = userQueueService.checkActiveUser(userId);
+        if(!existed && activeExisted) userDto =  new UserDto(activeCount, 0);
+        if(!existed && !activeExisted) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"토큰 정보가 없습니다.", null));
+
+        return userDto;
     }
 
     @Override

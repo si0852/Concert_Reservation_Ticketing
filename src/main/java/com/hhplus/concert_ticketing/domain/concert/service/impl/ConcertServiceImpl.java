@@ -62,11 +62,11 @@ public class ConcertServiceImpl implements ConcertService {
     }
 
 
-    @Cacheable(value = "concertOptionData", key = "#concertId")
+    @Cacheable(value = "concertOptionData", key = "#concertId", condition = "#concertId!=null")
     @Transactional
     @Override
-    public List<ConcertOption> getConcertOptionData(Long concertId) {
-        List<ConcertOption> concertOptionData = concertOptionRepository.getConcertOptionData(concertId);
+    public List<ConcertOption> getConcertOptionData(Long concertOptionId) {
+        List<ConcertOption> concertOptionData = concertOptionRepository.getConcertOptionDataByConcertOptionId(concertOptionId);
         if(concertOptionData.isEmpty()) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "콘서트 정보가 없습니다.", 0));
         return concertOptionData;
     }

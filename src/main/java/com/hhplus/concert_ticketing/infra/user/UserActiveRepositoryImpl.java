@@ -1,18 +1,16 @@
 package com.hhplus.concert_ticketing.infra.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hhplus.concert_ticketing.domain.queue.repository.UserActiveRepository;
+import com.hhplus.concert_ticketing.domain.user.repository.UserActiveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
-
+@Component
 public class UserActiveRepositoryImpl implements UserActiveRepository {
 
     @Autowired
@@ -20,26 +18,33 @@ public class UserActiveRepositoryImpl implements UserActiveRepository {
 
     private final static String activeKey = "Active";
 
-    @Autowired
-    ObjectMapper mapper;
-
     @Override
-    public void saveActiveUser(Long userId) {
-        Double score = Double.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")));
+    public void saveActiveUser(String userId, Double score) {
         redisTemplate.opsForZSet().add(activeKey, userId, score);
-        redisTemplate.expire(activeKey, Duration.ofMinutes(10));
     }
 
     @Override
-    public Object deleteActiveUser(Long userId) {
+    public void expireUser(String userId) {
+        redisTemplate.expire(activeKey, Duration.ofMinutes(10));
+    }
+
+
+    @Override
+    public Object deleteActiveUser(String userId) {
         return redisTemplate.opsForZSet().remove(activeKey, userId);
     }
 
     @Override
-    public Boolean checkUser(Long userId) {
+    public Boolean checkUser(String userId) {
         ZSetOperations<String, Object> zSet = redisTemplate.opsForZSet();
         Set<Object> range = zSet.range(activeKey, 0, -1);
         return range.contains(userId);
+    }
+
+    @Override
+    public ZSetOperations<String, Object> countActiveUser() {
+        return redisTemplate.opsForZSet();
+
     }
 
 }

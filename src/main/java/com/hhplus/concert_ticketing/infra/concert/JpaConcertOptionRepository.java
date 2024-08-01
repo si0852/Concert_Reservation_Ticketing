@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface JpaConcertOptionRepository extends JpaRepository<ConcertOption, Long> {
     List<ConcertOption> findAllByConcertId(Long concertId);
 
+    List<ConcertOption> findAllByConcertOptionId(Long concertOptionId);
+
     Optional<ConcertOption> findByConcertOptionIdAndConcertDateGreaterThanEqual(Long concertOptionId, LocalDateTime now);
 
     List<LocalDateTime> findConcertDateByConcertId(Long concertId);
