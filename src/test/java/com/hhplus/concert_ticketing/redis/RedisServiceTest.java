@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 
@@ -25,18 +26,25 @@ public class RedisServiceTest {
 
     private static final Logger log = LoggerFactory.getLogger(RedisServiceTest.class);
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Test
     void data_set_with_redis() {
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        String key = "first";
-        String content = "helloWorld!";
-        valueOperations.set(key, content);
+        SetOperations<String, Object> valueOperations = redisTemplate.opsForSet();
+        String key = "wait";
 
-        String value = valueOperations.get(key);
+        for (int i = 0; i < 40; i++) {
+            String content = "helloWorld" + i +"!";
+            valueOperations.add(key, content);
+        }
 
-        Assertions.assertThat(value).isEqualTo(content);
+        SetOperations<String, Object> so = redisTemplate.opsForSet();
+        Set<Object> first = so.members(key);
+        log.info("Waiting : " + Arrays.toString(first.toArray()));
+        boolean contains = first.contains("helloWorld7!");
+        log.info("contains : " + contains);
+        Object popContent = so.pop(key);
+        log.info("popContent : " + popContent);
     }
 
     @Test
@@ -51,9 +59,9 @@ public class RedisServiceTest {
             redisTemplate.expire("Active", Duration.ofMinutes(5));
         }
 
-        ZSetOperations<String, String> stringStringZSetOperations = redisTemplate.opsForZSet();
+        ZSetOperations<String, Object> stringStringZSetOperations = redisTemplate.opsForZSet();
 
-        Set<String> active = stringStringZSetOperations.range("Active", 0, 10);
+        Set<Object> active = stringStringZSetOperations.range("Active", 0, 10);
         log.info("active : " + Arrays.toString(active.toArray()));
     }
 
