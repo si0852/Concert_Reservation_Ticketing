@@ -1,4 +1,4 @@
-package com.hhplus.concert_ticketing.application.facade;
+package com.hhplus.concert_ticketing.application.point;
 
 import com.hhplus.concert_ticketing.domain.point.entity.Customer;
 

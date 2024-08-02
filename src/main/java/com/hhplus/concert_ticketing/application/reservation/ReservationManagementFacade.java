@@ -1,4 +1,4 @@
-package com.hhplus.concert_ticketing.application.facade;
+package com.hhplus.concert_ticketing.application.reservation;
 
 import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
 

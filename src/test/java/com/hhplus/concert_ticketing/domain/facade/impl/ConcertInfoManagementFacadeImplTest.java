@@ -1,12 +1,13 @@
 package com.hhplus.concert_ticketing.domain.facade.impl;
 
-import com.hhplus.concert_ticketing.application.facade.impl.ConcertInfoManagementFacadeImpl;
+import com.hhplus.concert_ticketing.application.concert.impl.ConcertInfoManagementFacadeImpl;
 import com.hhplus.concert_ticketing.domain.concert.entity.Concert;
 import com.hhplus.concert_ticketing.domain.concert.entity.ConcertOption;
 import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
 import com.hhplus.concert_ticketing.infra.queue.impl.TokenRepositoryImpl;
 import com.hhplus.concert_ticketing.domain.concert.service.impl.ConcertServiceImpl;
 import com.hhplus.concert_ticketing.domain.queue.service.impl.TokenServiceImpl;
+import com.hhplus.concert_ticketing.presentation.concert.dto.ConcertOptionDto;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         //when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token, concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -75,7 +76,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         //then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getConcertOption(token, concertId);
+            concertInfoManagementFacade.getConcertOption(concertId);
         });
     }
 
@@ -97,7 +98,7 @@ class ConcertInfoManagementFacadeImplTest {
         );
 
         when(concertService.getConcertOptionData(concertId)).thenReturn(concertOptionList);
-        List<ConcertOption> concertOption = concertInfoManagementFacade.getConcertOption(token, concertId);
+        List<ConcertOptionDto> concertOption = concertInfoManagementFacade.getConcertOption(concertId);
         //then
         assertThat(concertOption).isEqualTo(concertOptionList);
     }
@@ -114,7 +115,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getSeatData(concertOptionId, tokend);
+            concertInfoManagementFacade.getSeatData(concertOptionId);
         });
     }
 
@@ -134,7 +135,7 @@ class ConcertInfoManagementFacadeImplTest {
 
         // when && then
         assertThrows(RuntimeException.class, () -> {
-            concertInfoManagementFacade.getSeatData(concertOptionId, tokend);
+            concertInfoManagementFacade.getSeatData(concertOptionId);
         });
     }
 
@@ -163,6 +164,6 @@ class ConcertInfoManagementFacadeImplTest {
                 thenReturn(seatData);
 
         // when && then
-        assertEquals(seatData.size(), concertInfoManagementFacade.getSeatData(concertOptionId, tokend).size());
+        assertEquals(seatData.size(), concertInfoManagementFacade.getSeatData(concertOptionId).size());
     }
 }

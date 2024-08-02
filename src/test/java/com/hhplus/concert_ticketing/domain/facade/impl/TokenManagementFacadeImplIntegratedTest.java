@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.domain.facade.impl;
 
-import com.hhplus.concert_ticketing.application.facade.TokenManagementFacade;
+import com.hhplus.concert_ticketing.application.queue.TokenManagementFacade;
 import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 
