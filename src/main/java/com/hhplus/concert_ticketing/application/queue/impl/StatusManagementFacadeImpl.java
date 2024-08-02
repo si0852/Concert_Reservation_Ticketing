@@ -1,13 +1,24 @@
 package com.hhplus.concert_ticketing.application.queue.impl;
 
 import com.hhplus.concert_ticketing.application.queue.StatusManagementFacade;
+import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
+import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
+import com.hhplus.concert_ticketing.domain.queue.entity.Token;
+import com.hhplus.concert_ticketing.domain.concert.service.ConcertService;
+import com.hhplus.concert_ticketing.domain.reservation.service.ReservationService;
+import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.domain.user.mapper.UserMapper;
 import com.hhplus.concert_ticketing.domain.user.service.impl.UserQueueService;
 import com.hhplus.concert_ticketing.presentation.queue.dto.ScoreDto;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
+import com.hhplus.concert_ticketing.status.TokenStatus;
+import lombok.extern.java.Log;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -17,15 +28,6 @@ import java.util.stream.Collectors;
 @Component
 public class StatusManagementFacadeImpl implements StatusManagementFacade {
 
-//    private final TokenService tokenService;
-//    private final ReservationService reservationService;
-//    private final ConcertService concertService;
-//
-//    public StatusManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, ConcertService concertService) {
-//        this.tokenService = tokenService;
-//        this.reservationService = reservationService;
-//        this.concertService = concertService;
-//    }
 
     private final UserQueueService userQueueService;
     private final static String activeKey = "Active";
@@ -66,52 +68,10 @@ public class StatusManagementFacadeImpl implements StatusManagementFacade {
         }
     }
 
-//    private void backup() {
-//        try {
-//            List<Token> tokenListByActive = tokenService.getTokenListByStatus(TokenStatus.ACTIVE.toString());
-//
-//            for (Token token: tokenListByActive) {
-//                LocalDateTime createdAt = token.getCreatedAt();
-//                LocalDateTime expiredAt = token.getExpiresAt();
-//                Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
-//                if (seconds > 300L){
-//                    token.changeExpired();
-//                    tokenService.updateToken(token);
-//                }
-//            }
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
-
 
     @Override
     public void expiredReservationStatus() {
 //        return true;
     }
 
-//    private void backup2() {
-//        try {
-//            String status = ReservationStatus.WAITING.toString();
-//            List<Reservation> reservationDataByStatus = reservationService.getReservationDataByStatus(status);
-//
-//            for (Reservation reservation : reservationDataByStatus) {
-//                LocalDateTime createdAt = reservation.getCreatedAt();
-//                LocalDateTime expiredAt = reservation.getUpdatedAt();
-//                Long seconds = Duration.between(createdAt, expiredAt).getSeconds();
-//                if (seconds > 300L) {
-//                    reservation.changeStateCancel();
-//                    reservationService.UpdateReservationData(reservation);
-//                    Seat seatData = concertService.getSeatOnlyData(reservation.getSeatId());
-//                    seatData.changeStateUnlock();
-//                    concertService.updateSeatData(seatData);
-//                }
-//
-//            }
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
 }
