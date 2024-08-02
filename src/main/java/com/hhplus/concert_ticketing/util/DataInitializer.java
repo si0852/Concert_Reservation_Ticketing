@@ -18,7 +18,7 @@ import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Random;
 
-@Configuration
+//@Configuration
 public class DataInitializer {
 
     private final ConcertRepositoryImpl concertRepositoryImpl;
@@ -32,7 +32,7 @@ public class DataInitializer {
         this.seatRepositoryImpl = seatRepositoryImpl;
     }
 
-    @Bean
+//    @Bean
     public CommandLineRunner concertData() {
         return (args) -> {
             Faker faker = new Faker(new Locale("ko", "KOREA"));
