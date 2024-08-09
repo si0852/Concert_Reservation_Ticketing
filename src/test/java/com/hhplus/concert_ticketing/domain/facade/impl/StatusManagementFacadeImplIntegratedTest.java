@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.domain.facade.impl;
 
-import com.hhplus.concert_ticketing.application.facade.StatusManagementFacade;
+import com.hhplus.concert_ticketing.application.queue.StatusManagementFacade;
 import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
 import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
 import com.hhplus.concert_ticketing.domain.queue.entity.Token;

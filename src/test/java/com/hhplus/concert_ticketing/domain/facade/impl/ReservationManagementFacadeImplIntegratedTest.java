@@ -1,7 +1,7 @@
 package com.hhplus.concert_ticketing.domain.facade.impl;
 
 
-import com.hhplus.concert_ticketing.application.facade.ReservationManagementFacade;
+import com.hhplus.concert_ticketing.application.reservation.ReservationManagementFacade;
 import com.hhplus.concert_ticketing.domain.concert.entity.Concert;
 import com.hhplus.concert_ticketing.domain.concert.entity.ConcertOption;
 import com.hhplus.concert_ticketing.domain.concert.entity.Seat;
@@ -12,6 +12,7 @@ import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
 import com.hhplus.concert_ticketing.domain.reservation.service.ReservationService;
 import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
+import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.status.SeatStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

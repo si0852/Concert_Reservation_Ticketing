@@ -1,6 +1,6 @@
 package com.hhplus.concert_ticketing.domain.facade.impl;
 
-import com.hhplus.concert_ticketing.application.facade.impl.ChargeManagementFacadeImpl;
+import com.hhplus.concert_ticketing.application.point.impl.ChargeManagementFacadeImpl;
 import com.hhplus.concert_ticketing.domain.point.service.CustomerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
