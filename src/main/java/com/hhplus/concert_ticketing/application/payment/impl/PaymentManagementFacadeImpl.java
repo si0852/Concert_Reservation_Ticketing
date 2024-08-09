@@ -12,10 +12,14 @@ import com.hhplus.concert_ticketing.domain.queue.entity.Token;
 import com.hhplus.concert_ticketing.domain.queue.service.TokenService;
 import com.hhplus.concert_ticketing.domain.reservation.entity.Reservation;
 import com.hhplus.concert_ticketing.domain.reservation.service.ReservationService;
+import com.hhplus.concert_ticketing.domain.user.service.impl.UserQueueService;
+import com.hhplus.concert_ticketing.event.PaymentEvent;
 import com.hhplus.concert_ticketing.presentation.dto.response.ResponseDto;
 import com.hhplus.concert_ticketing.status.ReservationStatus;
 import com.hhplus.concert_ticketing.util.exception.InvalidTokenException;
+import com.hhplus.concert_ticketing.util.exception.NoInfoException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,25 +29,27 @@ import java.time.LocalDateTime;
 @Component
 public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
 
-    private final TokenService tokenService;
+    private final UserQueueService userQueueService;
     private final ReservationService reservationService;
     private final PaymentService paymentService;
     private final CustomerService customerService;
     private final ConcertService concertService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public PaymentManagementFacadeImpl(TokenService tokenService, ReservationService reservationService, PaymentService paymentService, CustomerService customerService, ConcertService concertService) {
-        this.tokenService = tokenService;
+    public PaymentManagementFacadeImpl(UserQueueService userQueueService, ReservationService reservationService, PaymentService paymentService, CustomerService customerService, ConcertService concertService, ApplicationEventPublisher eventPublisher) {
+        this.userQueueService = userQueueService;
         this.reservationService = reservationService;
         this.paymentService = paymentService;
         this.customerService = customerService;
         this.concertService = concertService;
+        this.eventPublisher = eventPublisher;
     }
 
-    @Transactional
     @Override
     public Payment paymentProgress(Long reservationId, String token)  throws Exception{
         // 예약 상태 확인
         Reservation validationReservationInfo = reservationService.getReservationDataByReservationId(reservationId);
+        if(validationReservationInfo == null) throw new NoInfoException(new ResponseDto(HttpServletResponse.SC_NOT_FOUND, "예약정보가 없습니다.", null));
 
         String reservationStatus = validationReservationInfo.getStatus();
         LocalDateTime createdAt = validationReservationInfo.getCreatedAt();
@@ -52,7 +58,6 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
 
         Seat seatData = concertService.getSeatOnlyData(validationReservationInfo.getSeatId());
 
-        Token validateToken = tokenService.validateTokenByToken(token);
 
         // -> 토큰 만료 (예약 시간 만료)
         if (reservationStatus.equals(ReservationStatus.PAID.toString())) throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"이미 예약된 정보입니다.", null));
@@ -60,8 +65,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         if(reservationStatus.equals(ReservationStatus.WAITING.toString()) && seconds > 300L) {
             // ---> 예약 상태 취소로 변경
             validationReservationInfo.changeStateCancel();
-            // ---> 토큰 상태 만료로 변경
-            validateToken.changeExpired();
+
             // ---> 좌석 상태 열림으로 변경
             seatData.changeStateUnlock();
 
@@ -70,7 +74,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
             // ----> 좌석 상태 열림 처리
             concertService.updateSeatData(seatData);
             // ----> 토큰 상태 만료 처리
-            tokenService.updateToken(validateToken);
+            eventPublisher.publishEvent(new PaymentEvent(this, validationReservationInfo, token));
             // -----> 예약 만료 에러 발생
             throw new InvalidTokenException(new ResponseDto(HttpServletResponse.SC_FORBIDDEN,"예약 시간이 만료되었습니다.", null));
         }
@@ -80,7 +84,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         ConcertOption concertOptionData = concertService.getConcertOptionDataById(seatData.getConcertOptionId());
 
         // --> 유저 정보 조회
-        Customer customerData = customerService.getCustomerData(validateToken.getUserId());
+        Customer customerData = customerService.getCustomerData(validationReservationInfo.getUserId());
 
         // --> 잔액 유효성 검증
         Double ticketPrice = concertOptionData.getPrice();
@@ -104,8 +108,7 @@ public class PaymentManagementFacadeImpl implements PaymentManagementFacade {
         reservationService.UpdateReservationData(validationReservationInfo);
 
         // ---> 토큰 만료
-        validateToken.changeExpired();
-        tokenService.updateToken(validateToken);
+        eventPublisher.publishEvent(new PaymentEvent(this, validationReservationInfo, token));
 
         return paymentResult;
     }
